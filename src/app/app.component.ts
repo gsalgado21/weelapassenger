@@ -37,9 +37,12 @@ export class MyApp {
       // Here you can do any higher level native things you might need.
       statusBar.styleDefault();
       splashScreen.hide();
-
+      
+      //afAuth.auth.signOut();
+      
       // check for login stage, then redirect
       afAuth.authState.take(1).subscribe(authData => {
+        console.log(authData);
         if (authData) {
           this.nav.setRoot(HomePage);
         } else {

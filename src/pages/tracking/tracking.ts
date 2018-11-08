@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, Platform, ModalController, AlertController, NavParams} from 'ionic-angular';
+import { NavController, Platform, ModalController, AlertController, NavParams } from 'ionic-angular';
 import { DriverService } from '../../services/driver-service';
 import { HomePage } from "../home/home";
 import { TripService } from "../../services/trip-service";
@@ -22,20 +22,20 @@ export class TrackingPage {
   sos: any;
   alertCnt: any = 0;
 
-  constructor(public nav: NavController, public driverService: DriverService, public platform: Platform, public navParams: NavParams,public tripService: TripService, public placeService: PlaceService, public modalCtrl: ModalController, public alertCtrl: AlertController) {
+  constructor(public nav: NavController, public driverService: DriverService, public platform: Platform, public navParams: NavParams, public tripService: TripService, public placeService: PlaceService, public modalCtrl: ModalController, public alertCtrl: AlertController) {
     this.sos = SOS;
   }
 
   ionViewDidLoad() {
     let tripId;
-    if(this.navParams.get('tripId'))
+    if (this.navParams.get('tripId'))
       tripId = this.navParams.get('tripId')
     else
-     tripId = this.tripService.getId();
+      tripId = this.tripService.getId();
 
-    this.tripService.getTrip(tripId).take(1).subscribe(snapshot => {
+    this.tripService.getTrip(tripId).take(1).subscribe((snapshot: any) => {
       this.trip = snapshot;
-
+      console.log('getTrip', snapshot)
       this.driverService.getDriver(snapshot.driverId).take(1).subscribe(snap => {
         console.log(snap);
         this.driver = snap;
@@ -52,26 +52,27 @@ export class TrackingPage {
   }
 
   watchTrip(tripId) {
-      this.tripService.getTrip(tripId).subscribe(snapshot => {
-        this.tripStatus = snapshot.status;
-      });
-  }
-  showRateCard(){
-    let final = this.trip.fee - (this.trip.fee *  (parseInt(this.trip.discount) / 100));
-    let message = '<p>Fee: '+this.trip.fee+'<br>Promo: '+ this.trip.promocode +'<br> Discount (%): '+this.trip.discount+'<br/>Payment Method: '+this.trip.paymentMethod+'</p><h2>' + this.trip.currency+' '+final +'</h2>';
-      this.alertCtrl.create({
-        message: message,
-        enableBackdropDismiss: false,
-        buttons: [{
-          text:'Rate Trip',
-          handler: data => {
-            this.showRatingAlert();
-          }
-        }],
-      }).present();
+    this.tripService.getTrip(tripId).subscribe((snapshot: any) => {
+      this.tripStatus = snapshot.status;
+    });
   }
 
-  showRatingAlert(){
+  showRateCard() {
+    let final = this.trip.fee - (this.trip.fee * (parseInt(this.trip.discount) / 100));
+    let message = '<p>Fee: ' + this.trip.fee + '<br>Promo: ' + this.trip.promocode + '<br> Discount (%): ' + this.trip.discount + '<br/>Payment Method: ' + this.trip.paymentMethod + '</p><h2>' + this.trip.currency + ' ' + final + '</h2>';
+    this.alertCtrl.create({
+      message: message,
+      enableBackdropDismiss: false,
+      buttons: [{
+        text: 'Rate Trip',
+        handler: data => {
+          this.showRatingAlert();
+        }
+      }],
+    }).present();
+  }
+
+  showRatingAlert() {
     console.log(this.trip, this.driver);
     let alert = this.alertCtrl.create({
       title: 'Rate Trip',
@@ -83,9 +84,11 @@ export class TrackingPage {
     alert.addInput({ type: 'radio', label: 'Bad', value: '2' });
     alert.addInput({ type: 'radio', label: 'Worst', value: '1' });
 
-    alert.addButton({ text: 'Cancel', handler : ()=>{
-      this.nav.setRoot(HomePage)
-    }});
+    alert.addButton({
+      text: 'Cancel', handler: () => {
+        this.nav.setRoot(HomePage)
+      }
+    });
     alert.addButton({
       text: 'OK',
       handler: data => {
@@ -136,8 +139,8 @@ export class TrackingPage {
     console.log(POSITION_INTERVAL);
   }
 
-  cancelTrip(){
-    this.tripService.cancelTrip(this.trip.$key).then(data=>{
+  cancelTrip() {
+    this.tripService.cancelTrip(this.trip.$key).then(data => {
       console.log(data);
       this.nav.setRoot(HomePage);
     })
@@ -147,10 +150,10 @@ export class TrackingPage {
   showDriverOnMap() {
     // get user's position
     this.driverService.getDriverPosition(
-        this.placeService.getLocality(),
-        this.driver.type,
-        this.driver.$key
-    ).take(1).subscribe(snapshot => {
+      this.placeService.getLocality(),
+      this.driver.type,
+      this.driver.$key
+    ).take(1).subscribe((snapshot: any) => {
       // create or update
       let latLng = new google.maps.LatLng(snapshot.lat, snapshot.lng);
 
@@ -158,7 +161,7 @@ export class TrackingPage {
         console.log(this.tripStatus);
         this.map.setCenter(latLng);
       }
-      
+
       // show vehicle to map
       this.marker = new google.maps.Marker({
         map: this.map,

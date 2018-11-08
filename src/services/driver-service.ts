@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { AngularFireDatabase } from "@angular/fire/database";
+import { map } from 'rxjs/operators';
 
 @Injectable()
 export class DriverService {
@@ -10,16 +11,16 @@ export class DriverService {
 
   // get driver by id
   getDriver(id) {
-    return this.db.object('drivers/' + id);
+    return this.db.object('drivers/' + id).valueChanges();
   }
 
   // get driver position
   getDriverPosition(locality, vehicleType, id) {
-    return this.db.object('localities/' + locality + '/' + vehicleType + '/' + id);
+    return this.db.object('localities/' + locality + '/' + vehicleType + '/' + id).valueChanges();
   }
 
   getActiveDriver(locality, vehicleType) {
-    return this.db.list('localities/' + locality + '/' + vehicleType);
+    return this.db.list('localities/' + locality + '/' + vehicleType).snapshotChanges().pipe(map(x => x.map(c => ({ uid: c.payload.key, ...c.payload.val() }))));
   }
 
   // calculate vehicle angle

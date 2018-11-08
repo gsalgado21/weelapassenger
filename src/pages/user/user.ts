@@ -30,13 +30,12 @@ export class UserPage {
   constructor(public nav: NavController, public authService: AuthService, public navParams: NavParams,public alertCtrl: AlertController,
               public toastCtrl: ToastController, public loadingCtrl: LoadingController, public platform: Platform, public tripService: TripService, public translate: TranslateService) {
     let userx = navParams.get('user');
-    this.authService.getUser(userx.uid).take(1).subscribe(snapshot => {
-      snapshot.uid = snapshot.$key;
+    this.authService.getUser(userx.uid).subscribe(snapshot => {
       this.user = snapshot;
       this.user.isEmailVerified = firebase.auth().currentUser.emailVerified;
       console.log(this.user);
     });
-    authService.getCardSetting().take(1).subscribe(snapshot => {
+    authService.getCardSetting().subscribe((snapshot:any) => {
       this.number = snapshot.number;
       this.exp = snapshot.exp;
       this.cvv = snapshot.cvv;
@@ -80,7 +79,7 @@ export class UserPage {
   getTrips(){
     let loading = this.loadingCtrl.create({ content: 'Please wait...'});
     loading.present();
-    this.tripService.getTrips().take(1).subscribe(snapshot => {
+    this.tripService.getTrips().subscribe(snapshot => {
       this.trips = snapshot.reverse();
       loading.dismiss();
     });

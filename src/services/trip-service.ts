@@ -135,13 +135,13 @@ export class TripService {
   }
 
   getTrip(id) {
-    return this.db.object('trips/' + id);
+    return this.db.object('trips/' + id).valueChanges();
   }
 
   getTrips() {
     let user = this.authService.getUserData();
     console.log(user);
-    return this.db.list('trips', q => q.orderByChild('passengerId').equalTo(user.uid));
+    return this.db.list('trips', q => q.orderByChild('passengerId').equalTo(user.uid)).valueChanges();
   }
 
   cancelTrip(id) {

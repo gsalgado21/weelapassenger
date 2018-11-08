@@ -8,12 +8,12 @@ export let TRIP_STATUS_GOING = 'going';
 export let TRIP_STATUS_FINISHED = 'finished';
 export let DEAL_TIMEOUT = 20000; // 20s
 
-export let EMAIL_VERIFICATION_ENABLED = true; // send verification email after user register
+export let EMAIL_VERIFICATION_ENABLED = false; // send verification email after user register
 export let ENABLE_SIGNUP = true;
 export let SOS = "+919500707757";
 
 // NOTE: Please update your firebase configurations on src/app/app.module.ts
 
-export let GOOGLE_MAP_API_KEY = "AIzaSyA7MNmGM6-bW6QugXONZWdKZs8Y9eViI7E";
+export let GOOGLE_MAP_API_KEY = "AIzaSyAAeH42ZD5xodV_me4mqLr_dXlGIRMGrfM";
 export let GOOGLE_MAP_BASE_URL = "https://maps.googleapis.com/maps/api/";
 export let DEFAULT_AVATAR = "http://placehold.it/150x150";

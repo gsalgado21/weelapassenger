@@ -52,16 +52,16 @@ export class HomePage {
   drivers: any;
   user = {};
   isTrackDriverEnabled = true;
-  discount:any = 0;
+  discount: any = 0;
   startLatLng: any;
   destLatLng: any;
   directionsService: any;
   directionsDisplay: any;
-  bounds:any;
+  bounds: any;
   cardNumber: any;
 
-  distanceText:any = '';
-  durationText:any = '';
+  distanceText: any = '';
+  durationText: any = '';
 
   constructor(public nav: NavController, public platform: Platform, public alertCtrl: AlertController,
     public placeService: PlaceService, private geolocation: Geolocation, private chRef: ChangeDetectorRef,
@@ -69,7 +69,7 @@ export class HomePage {
     public tripService: TripService, public driverService: DriverService, public afAuth: AngularFireAuth,
     public authService: AuthService, public translate: TranslateService,
     public dealService: DealService) {
-      // this.translate.setDefaultLang('en');
+
     this.origin = tripService.getOrigin();
     this.destination = tripService.getDestination();
 
@@ -78,16 +78,16 @@ export class HomePage {
         this.user = authService.getUserData();
       }
     });
-    
+
   }
 
   ionViewDidLoad() {
     // on view ready, start loading map
-    this.tripService.getTrips().subscribe( trips => {
+    this.tripService.getTrips().subscribe((trips: any) => {
       console.log(trips);
       trips.forEach(trip => {
         console.log(trip.status);
-        if(trip.status == 'waiting' || trip.status =='accepted' || trip.status == 'going'){
+        if (trip.status == 'waiting' || trip.status == 'accepted' || trip.status == 'going') {
           this.isTrackDriverEnabled = false;
           this.nav.setRoot(TrackingPage, { tripId: trip.$key });
         }
@@ -107,10 +107,10 @@ export class HomePage {
     this.paymentMethod = this.tripService.getPaymentMethod()
     return this.paymentMethod;
   }
-  choosePaymentMethod1(){
-    let alert = this.alertCtrl.create({ message:'Profile -> Payments to add card'});
+  choosePaymentMethod1() {
+    let alert = this.alertCtrl.create({ title: 'Método de Pagamento' });
     alert.addInput({ type: 'radio', label: 'Cash', value: 'cash', checked: true });
-    this.authService.getCardSetting().take(1).subscribe(snapshot => {
+    this.authService.getCardSetting().subscribe((snapshot: any) => {
       if (snapshot) {
         this.cardNumber = snapshot.number;
         if (this.cardNumber != null || this.cardNumber != undefined)
@@ -118,7 +118,7 @@ export class HomePage {
       }
     });
 
-    alert.addButton({ text: 'Cancel'});
+    alert.addButton({ text: 'Cancel' });
 
     alert.addButton({
       text: 'Ok',
@@ -144,8 +144,8 @@ export class HomePage {
     this.trackDrivers();
     this.toggleVehicles();
   }
-  goProfilePage(){
-    this.nav.push(UserPage,{ user: this.user });
+  goProfilePage() {
+    this.nav.push(UserPage, { user: this.user });
   }
 
   // load map
@@ -169,14 +169,15 @@ export class HomePage {
         mapTypeControl: false,
         zoomControl: false,
         streetViewControl: false,
+        disableDefaultUI: true
       });
-      
+
       let mapx = this.map;
       directionsDisplay.setMap(mapx);
 
       // find map center address
       let geocoder = new google.maps.Geocoder();
-      geocoder.geocode({'latLng': this.map.getCenter()}, (results, status) => {
+      geocoder.geocode({ 'latLng': this.map.getCenter() }, (results, status) => {
         if (status == google.maps.GeocoderStatus.OK) {
           if (!this.origin) {
             // set map center as origin
@@ -192,7 +193,7 @@ export class HomePage {
           let locality = this.placeService.setLocalityFromGeocoder(results);
           console.log('locality', locality);
           // load list vehicles
-          this.settingService.getPrices().subscribe(snapshot => {
+          this.settingService.getPrices().subscribe((snapshot: any) => {
             console.log(snapshot);
             let obj = snapshot[locality] ? snapshot[locality] : snapshot.default;
             console.log(obj)
@@ -208,25 +209,25 @@ export class HomePage {
             // calculate distance between origin adn destination
             if (this.destination) {
               this.placeService.getDirection(this.origin.location.lat, this.origin.location.lng, this.destination.location.lat,
-                  this.destination.location.lng).subscribe(result => {
-                    console.log(result);
-                    if(result.routes.length != 0 ){
-                      this.distance = result.routes[0].legs[0].distance.value;
-                      
-                      this.distanceText = result.routes[0].legs[0].distance.text;
-                      this.durationText = result.routes[0].legs[0].duration.text;
+                this.destination.location.lng).subscribe(result => {
+                  console.log(result);
+                  if (result.routes.length != 0) {
+                    this.distance = result.routes[0].legs[0].distance.value;
 
-                      for (let i = 0; i < this.vehicles.length; i++) {
-                        this.vehicles[i].fee = this.distance * this.vehicles[i].price / 1000;
-                        this.vehicles[i].fee = this.vehicles[i].fee.toFixed(2);
-                      }
-                    }else{
-                      this.alertCtrl.create({
-                        subTitle:'No Driver Found',
-                        buttons: ['OK']
-                      }).present();
+                    this.distanceText = result.routes[0].legs[0].distance.text;
+                    this.durationText = result.routes[0].legs[0].duration.text;
+
+                    for (let i = 0; i < this.vehicles.length; i++) {
+                      this.vehicles[i].fee = this.distance * this.vehicles[i].price / 1000;
+                      this.vehicles[i].fee = this.vehicles[i].fee.toFixed(2);
                     }
-              });
+                  } else {
+                    this.alertCtrl.create({
+                      subTitle: 'No Driver Found',
+                      buttons: ['OK']
+                    }).present();
+                  }
+                });
             }
 
             // set first device as default
@@ -234,7 +235,7 @@ export class HomePage {
             this.currentVehicle = this.vehicles[0];
 
             this.locality = locality;
-            if(this.isTrackDriverEnabled)
+            if (this.isTrackDriverEnabled)
               this.trackDrivers();
           });
         }
@@ -246,21 +247,21 @@ export class HomePage {
         var bounds = new google.maps.LatLngBounds();
         bounds.extend(this.startLatLng);
         bounds.extend(this.destLatLng);
-        
+
         mapx.fitBounds(bounds);
         var request = {
-            origin: this.startLatLng,
-            destination: this.destLatLng,
-            travelMode: google.maps.TravelMode.DRIVING
+          origin: this.startLatLng,
+          destination: this.destLatLng,
+          travelMode: google.maps.TravelMode.DRIVING
         };
         directionsService.route(request, function (response, status) {
-            if (status == google.maps.DirectionsStatus.OK) {
-                console.log(response);
-                directionsDisplay.setDirections(response);
-                directionsDisplay.setMap(mapx);
-            } else {
-                console.log("error");
-            }
+          if (status == google.maps.DirectionsStatus.OK) {
+            console.log(response);
+            directionsDisplay.setDirections(response);
+            directionsDisplay.setMap(mapx);
+          } else {
+            console.log("error");
+          }
         });
       }
       this.hideLoading();
@@ -268,7 +269,7 @@ export class HomePage {
       console.log('Error getting location', error);
     });
   }
-  showPromoPopup(){
+  showPromoPopup() {
     let prompt = this.alertCtrl.create({
       title: 'Enter Promo code',
       message: "",
@@ -292,21 +293,21 @@ export class HomePage {
             //verifying promocode
             firebase.database().ref('promocodes').orderByChild("code").equalTo(data.promocode).once('value', promocodes => {
               console.log(promocodes.val());
-              let tmp:any = [];
-              promocodes.forEach( promo => {
-                tmp.push({ key: promo.key, ...promo.val()})
+              let tmp: any = [];
+              promocodes.forEach(promo => {
+                tmp.push({ key: promo.key, ...promo.val() })
                 return false;
               })
               tmp = tmp[0];
               console.log(tmp)
-              if(promocodes.val() != null || promocodes.val() != undefined){
+              if (promocodes.val() != null || promocodes.val() != undefined) {
                 this.promocode = tmp.code;
                 this.discount = tmp.discount;
                 this.tripService.setPromo(tmp.code);
                 this.tripService.setDiscount(tmp.discount);
-                console.log('promo applied',tmp.code, tmp.discount);
+                console.log('promo applied', tmp.code, tmp.discount);
               }
-            }, err=> console.log(err));
+            }, err => console.log(err));
           }
         }
       ]
@@ -365,7 +366,7 @@ export class HomePage {
     if (this.drivers) {
       this.makeDeal(0);
     }
-    
+
   }
 
   makeDeal(index) {
@@ -374,26 +375,26 @@ export class HomePage {
 
     if (driver) {
       driver.status = 'Bidding';
-      this.dealService.getDriverDeal(driver.$key).take(1).subscribe(snapshot => {
+      this.dealService.getDriverDeal(driver.uid).take(1).subscribe((snapshot: any) => {
         // if user is available
-        if (snapshot.$value === null) {
+        if (snapshot === null) {
           // create a record
           console.log(snapshot);
           this.dealService.makeDeal(
-              driver.$key,
-              this.tripService.getOrigin(),
-              this.tripService.getDestination(),
-              this.tripService.getDistance(),
-              this.tripService.getFee(),
-              this.tripService.getCurrency(),
-              this.tripService.getNote(),
-              this.tripService.getPaymentMethod(),
-              this.tripService.getPromo(),
-              this.tripService.getDiscount()
+            driver.uid,
+            this.tripService.getOrigin(),
+            this.tripService.getDestination(),
+            this.tripService.getDistance(),
+            this.tripService.getFee(),
+            this.tripService.getCurrency(),
+            this.tripService.getNote(),
+            this.tripService.getPaymentMethod(),
+            this.tripService.getPromo(),
+            this.tripService.getDiscount()
           ).then(() => {
-            let sub = this.dealService.getDriverDeal(driver.$key).subscribe(snap => {
+            let sub = this.dealService.getDriverDeal(driver.$key).subscribe((snap: any) => {
               // if record doesn't exist or is accepted
-              if (snap.$value === null || snap.status != DEAL_STATUS_PENDING) {
+              if (snap === null || snap.status != DEAL_STATUS_PENDING) {
                 sub.unsubscribe();
 
                 // if deal has been cancelled
@@ -420,7 +421,7 @@ export class HomePage {
       console.log('No user found');
       this.locateDriver = false;
       this.alertCtrl.create({
-        subTitle:'No Driver Found',
+        subTitle: 'No Driver Found',
         buttons: ['OK']
       }).present();
     }
@@ -435,13 +436,13 @@ export class HomePage {
   // choose origin place
   chooseOrigin() {
     // go to places page
-    this.nav.push(PlacesPage, {type: 'origin'});
+    this.nav.push(PlacesPage, { type: 'origin' });
   }
 
   // choose destination place
   chooseDestination() {
     // go to places page
-    this.nav.push(PlacesPage, {type: 'destination'});
+    this.nav.push(PlacesPage, { type: 'destination' });
   }
 
   // choose payment method
@@ -460,7 +461,7 @@ export class HomePage {
       position: latLng
     });
     startMarker.setMap(this.map);
-    if(this.destination)
+    if (this.destination)
       startMarker.setMap(null);
     // set map center to origin address
     this.map.setCenter(latLng);
@@ -498,7 +499,7 @@ export class HomePage {
   // show drivers on map
   showDriverOnMap(locality) {
     // get active drivers
-    this.driverService.getActiveDriver(locality, this.currentVehicle.id).take(1).subscribe(snapshot => {
+    this.driverService.getActiveDriver(locality, this.currentVehicle.id).subscribe((snapshot:any) => {
       console.log('fresh vehicles');
       console.log(snapshot);
       // clear vehicles
@@ -510,7 +511,7 @@ export class HomePage {
         // only show vehicle which has last active < 30 secs & distance < 5km
         let distance = this.placeService.calcCrow(vehicle.lat, vehicle.lng, this.origin.location.lat, this.origin.location.lng);
         console.log(distance);
-        console.log("distance:"+distance+" Last Active: "+(Date.now() - vehicle.last_active));
+        console.log("distance:" + distance + " Last Active: " + (Date.now() - vehicle.last_active));
         // checking last active time and distance
         if (distance < SHOW_VEHICLES_WITHIN && Date.now() - vehicle.last_active < VEHICLE_LAST_ACTIVE_LIMIT) {
           // create or update
@@ -530,13 +531,13 @@ export class HomePage {
 
           // add vehicle and marker to the list
           vehicle.distance = distance;
-          console.log(marker);
+          //console.log(marker);
           this.driverMarkers.push(marker);
           this.activeDrivers.push(vehicle);
         } else {
           console.log('This vehicle is too far');
         }
-        
+
       });
     });
   }

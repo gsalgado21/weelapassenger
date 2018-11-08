@@ -11,13 +11,13 @@ export class PaymentMethodPage {
   carNumber: any = null;
 
   constructor(public nav: NavController, public authService: AuthService, public tripService: TripService,
-              public loadingCtrl: LoadingController) {
+    public loadingCtrl: LoadingController) {
     const loading = loadingCtrl.create({
       content: 'Please wait...'
     });
     loading.present();
 
-    authService.getCardSetting().take(1).subscribe(snapshot => {
+    authService.getCardSetting().take(1).subscribe((snapshot: any) => {
       loading.dismiss();
       if (snapshot) {
         this.carNumber = snapshot.number;

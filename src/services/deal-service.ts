@@ -18,7 +18,8 @@ export class DealService {
   // make deal to driver
   makeDeal(driverId, origin, destination, distance, fee, currency, note, paymentMethod, promocode, discount) {
     let user = this.authService.getUserData();
-    return this.db.object('deals/' + driverId).set({
+    this.db.list('deals').push({driverId: {}});
+    return this.db.list('deals').set(driverId, {
       passengerId: user.uid,
       currency: currency,
       origin: origin,
@@ -36,7 +37,7 @@ export class DealService {
 
   // get deal by driverId
   getDriverDeal(driverId) {
-    return this.db.object('deals/' + driverId);
+    return this.db.object('deals/' + driverId).valueChanges();
   }
 
   // remove deal

@@ -1,5 +1,5 @@
 {
-    "LOGIN": "Login",
+    "LOGIN": "Entrar",
     "REGISTER": "Cadastrar-se",
     "FORGOT": "Esqueceu?",
     "EMAIL_ADDRESS": "Email",
@@ -22,7 +22,7 @@
     "COMPLETE_RIDE": "Completar Corrida",
     "PROMO": "Promoção",
     "NOTE": "Anotação",
-    "RIDE_NOW": "Ride Now",
+    "RIDE_NOW": "Solicitar Carro",
     "BASIC_PROFILE": "Perfil Básico",
     "PAYMENTS": "Pagamentos",
     "CARD_NUMBER": "Número do Cartão",

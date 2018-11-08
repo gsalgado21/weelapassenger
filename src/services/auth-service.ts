@@ -27,7 +27,6 @@ export class AuthService {
     return this.afAuth.auth.signInWithEmailAndPassword(email, password);
   }
 
-
   logout() {
     return this.afAuth.auth.signOut();
   }
@@ -36,13 +35,11 @@ export class AuthService {
   register(email, password, name, phoneNumber) {
     return Observable.create(observer => {
       this.afAuth.auth.createUserWithEmailAndPassword(email, password).then((authData: any) => {
-        authData.name = name;
-        authData.phoneNumber = phoneNumber;
-        authData.isPhoneVerified = false;
+        let user = {name: name, phoneNumber: phoneNumber, isPhoneVerified: false, email: email, uid: authData.user.uid};
         if (EMAIL_VERIFICATION_ENABLED === true)
           this.getUserData().sendEmailVerification();
         // update passenger object
-        this.updateUserProfile(authData);
+        this.updateUserProfile(user);
         observer.next();
       }).catch((error: any) => {
         if (error) {
@@ -98,6 +95,6 @@ export class AuthService {
   // get card setting
   getCardSetting() {
     const user = this.getUserData();
-    return this.db.object('passengers/' + user.uid + '/card');
+    return this.db.object('passengers/' + user.uid + '/card').valueChanges();
   }
 }
