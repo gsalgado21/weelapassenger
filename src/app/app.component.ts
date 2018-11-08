@@ -8,7 +8,7 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { LoginPage } from '../pages/login/login';
 import { HomePage } from '../pages/home/home';
 
-import { AngularFireAuth } from "angularfire2/auth/auth";
+import { AngularFireAuth } from "@angular/fire/auth";
 import { AuthService } from "../services/auth-service";
 import { UserPage } from "../pages/user/user";
 

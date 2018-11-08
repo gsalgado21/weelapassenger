@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
-import { AngularFireDatabase } from 'angularfire2/database';
-import { AngularFireAuth } from 'angularfire2/auth';
+import { AngularFireDatabase } from '@angular/fire/database';
+import { AngularFireAuth } from '@angular/fire/auth';
 import { Storage } from '@ionic/storage';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/take'
@@ -10,7 +10,7 @@ import { DEFAULT_AVATAR, EMAIL_VERIFICATION_ENABLED } from "./constants";
 export class AuthService {
   user: any;
 
-  constructor(public afAuth: AngularFireAuth, public db: AngularFireDatabase, public storage: Storage) {}
+  constructor(public afAuth: AngularFireAuth, public db: AngularFireDatabase, public storage: Storage) { }
 
   // get current user data from firebase
   getUserData() {
@@ -19,7 +19,7 @@ export class AuthService {
 
   // get passenger by id
   getUser(id) {
-    return this.db.object('passengers/' + id);
+    return this.db.object('passengers/' + id).valueChanges();
   }
 
   // login by email and password
@@ -39,7 +39,7 @@ export class AuthService {
         authData.name = name;
         authData.phoneNumber = phoneNumber;
         authData.isPhoneVerified = false;
-        if(EMAIL_VERIFICATION_ENABLED === true)
+        if (EMAIL_VERIFICATION_ENABLED === true)
           this.getUserData().sendEmailVerification();
         // update passenger object
         this.updateUserProfile(authData);
@@ -57,7 +57,7 @@ export class AuthService {
     console.log(user);
     let name = user.name ? user.name : user.email;
     let photoUrl = user.photoURL ? user.photoURL : DEFAULT_AVATAR;
-    
+
     this.getUserData().updateProfile({
       displayName: name,
       photoURL: photoUrl
@@ -76,8 +76,8 @@ export class AuthService {
   // create new user if not exist
   createUserIfNotExist(user) {
     // check if user does not exist
-    this.getUser(user.uid).take(1).subscribe(snapshot => {
-      if (snapshot.$value === null) {
+    this.getUser(user.uid).subscribe(snapshot => {
+      if (snapshot === null) {
         // update passenger object
         this.updateUserProfile(user);
       }

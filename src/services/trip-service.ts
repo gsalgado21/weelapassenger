@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { AngularFireDatabase } from "angularfire2/database/database";
+import { AngularFireDatabase } from "@angular/fire/database";
 import { Place } from "./place";
 import { AuthService } from "./auth-service";
 
@@ -87,17 +87,17 @@ export class TripService {
     return this.note;
   }
 
-  setPromo(promocode){
+  setPromo(promocode) {
     return this.promocode = promocode;
   }
-  getPromo(){
+  getPromo() {
     return this.promocode;
   }
-  
-  setDiscount(discount){
+
+  setDiscount(discount) {
     return this.discount = discount;
   }
-  getDiscount(){
+  getDiscount() {
     return this.discount;
   }
 
@@ -141,16 +141,11 @@ export class TripService {
   getTrips() {
     let user = this.authService.getUserData();
     console.log(user);
-    return this.db.list('trips', {
-      query: {
-        orderByChild: 'passengerId',
-        equalTo: user.uid
-      }
-    });
+    return this.db.list('trips', q => q.orderByChild('passengerId').equalTo(user.uid));
   }
 
-  cancelTrip(id){
-    return this.db.object('trips/'+id).update({ status: 'canceled'})
+  cancelTrip(id) {
+    return this.db.object('trips/' + id).update({ status: 'canceled' })
   }
 
   rateTrip(tripId, stars) {

@@ -14,7 +14,7 @@ import { TripService } from "../../services/trip-service";
 import { SHOW_VEHICLES_WITHIN, POSITION_INTERVAL, VEHICLE_LAST_ACTIVE_LIMIT } from "../../services/constants";
 import { DEAL_STATUS_PENDING, DEAL_STATUS_ACCEPTED } from "../../services/constants";
 import 'rxjs/Rx'
-import { AngularFireAuth } from "angularfire2/auth/auth";
+import { AngularFireAuth } from "@angular/fire/auth";
 import { AuthService } from "../../services/auth-service";
 import * as firebase from 'firebase';
 

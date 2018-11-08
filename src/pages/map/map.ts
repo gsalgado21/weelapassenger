@@ -5,12 +5,8 @@ import { PlaceService } from "../../services/place-service";
 import { HomePage } from "../home/home";
 import { TripService } from "../../services/trip-service";
 declare var google: any;
-/*
- Generated class for the LoginPage page.
 
- See http://ionicframework.com/docs/v2/components/#navigation for more info on
- Ionic pages and navigation.
- */
+
 @Component({
   selector: 'page-map',
   templateUrl: 'map.html',

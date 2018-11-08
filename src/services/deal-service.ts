@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { AngularFireDatabase } from "angularfire2/database/database";
+import { AngularFireDatabase } from "@angular/fire/database";
 import { DEAL_STATUS_PENDING } from "./constants";
 import { AuthService } from "./auth-service";
 

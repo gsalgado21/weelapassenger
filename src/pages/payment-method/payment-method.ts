@@ -3,12 +3,6 @@ import { NavController, LoadingController } from 'ionic-angular';
 import { AuthService } from "../../services/auth-service";
 import { TripService } from "../../services/trip-service";
 
-/*
- Generated class for the PaymentMethodPage page.
-
- See http://ionicframework.com/docs/v2/components/#navigation for more info on
- Ionic pages and navigation.
- */
 @Component({
   selector: 'page-payment-method',
   templateUrl: 'payment-method.html'
