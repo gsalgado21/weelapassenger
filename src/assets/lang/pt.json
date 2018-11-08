@@ -1,8 +1,8 @@
 {
     "LOGIN": "Login",
-    "REGISTER": "Register",
-    "FORGOT": "Forgot ?",
-    "EMAIL_ADDRESS": "Email Address",
+    "REGISTER": "Cadastrar-se",
+    "FORGOT": "Esqueceu?",
+    "EMAIL_ADDRESS": "Email",
     "PASSWORD": "Senha",
     "FULLNAME": "Nome Completo",
     "PHONE_NUMBER": "Nº do Celular",
