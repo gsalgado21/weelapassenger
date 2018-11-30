@@ -12,7 +12,7 @@ export class HttpService {
 
   constructor(private http: Http, private file: File, private transfer: FileTransfer) {
     //this.api_path = 'http://192.168.15.23:3000/api/v1/';
-    this.api_path = 'https://api.weela.com.br/api/v1/';
+    this.api_path = 'https://52.67.62.135/api/v1/';
   }
 
   createAuthorizationHeader(headers: Headers) {
