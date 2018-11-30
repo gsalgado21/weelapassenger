@@ -1,37 +1,45 @@
-<ion-content>
-    <div padding text-center class="header">
-      <div class="logo secondary-bg">
-        <!-- <img src="assets/img/login.png" /> -->
-        <ion-icon name="ios-car" color="light"></ion-icon>
-      </div>
-      <h2 ion-text color="light">{{'REGISTER' | translate}}</h2>
-    </div>
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>CADASTRE-SE</ion-title>
+  </ion-navbar>
+</ion-header>
 
-  <ion-list class="list-form" padding>
-    <ion-item>
-        <ion-label stacked>{{'FULLNAME' | translate }}</ion-label>
-      <ion-input type="text" [(ngModel)]="name"></ion-input>
-    </ion-item>
-    <ion-item>
-        <ion-label stacked>{{'EMAIL_ADDRESS' | translate }}</ion-label>
-      <ion-input type="email" [(ngModel)]="email"></ion-input>
-    </ion-item>
-    <ion-item>
-        <ion-label stacked>{{'PASSWORD' | translate }} (MIN 6 CHAR)</ion-label>
-        <ion-input type="password" [(ngModel)]="password"></ion-input>
+<ion-content>
+  <form (ngSubmit)="signup()" #register="ngForm">
+    <ion-card class="avatar" (tap)="selectImage()">
+      <img [src]="user.image_path || 'assets/img/default-dp.png'">
+    </ion-card>
+
+    <ion-list padding-horizontal no-margin>
+      <ion-item>
+        <ion-label stacked>Nome Completo <i class="req"></i></ion-label>
+        <ion-input type="text" name="name" [(ngModel)]="user.name" required></ion-input>
       </ion-item>
-    <ion-item>
-        <ion-label stacked>{{'PHONE_NUMBER' | translate }}</ion-label>
-      <ion-input type="tel" [(ngModel)]="phoneNumber"></ion-input>
-    </ion-item>
-   
-    <ion-item>
-      <button ion-button block padding (click)="signup()">
-          {{'REGISTER' | translate}}
-      </button>
-    </ion-item>
-  </ion-list>
+      <ion-item>
+        <ion-label stacked>CPF <i class="req"></i></ion-label>
+        <ion-input type="tel" name="cpf" [(ngModel)]="user.federal_tax_id" [brmasker]="{person: true, len: 14}"
+          required minlength="13" maxlength="14"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label stacked>Email <i class="req"></i></ion-label>
+        <ion-input type="email" name="email" [(ngModel)]="user.email" required></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label stacked>Telefone (com DDD) <i class="req"></i></ion-label>
+        <ion-input type="tel" name="phone" [(ngModel)]="user.phone" [brmasker]="{phone: true}" required></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label stacked>Senha (mín. 6 caracteres) <i class="req"></i></ion-label>
+        <ion-input type="password" name="password" [(ngModel)]="user.password" required minlength="6"></ion-input>
+      </ion-item>
+      <ion-item>
+        <button ion-button padding block round type="submit" [disabled]="!register.form.valid">Confirmar</button>
+      </ion-item>
+    </ion-list>
+    <div padding-horizontal ion-text no-margin color="danger" text-center>
+      <small>
+        * Campos obrigatórios
+      </small>
+    </div>
+  </form>
 </ion-content>
-<ion-footer>
-    <button ion-button clear block (click)="login()">{{'LOGIN' | translate}}</button>
-</ion-footer>

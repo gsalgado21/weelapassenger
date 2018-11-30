@@ -1,1 +1,12 @@
-page-login{}
+page-login {
+  .logo{
+    width: 80%;
+    position: relative;
+    margin: 40px auto;
+  }
+  .header{
+    background: color($colors, primary);
+    position: relative;
+    text-align: center;
+  }
+}

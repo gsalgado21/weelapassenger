@@ -1,0 +1,54 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>Suas Viagens</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  <ion-card *ngFor="let trip of trips">
+    <ion-list>
+      <ion-row>
+        <ion-col col-6>
+          <ion-item>
+            <p>Data e Hora</p>
+            <h2>{{trip.started_at | date}}</h2>
+          </ion-item>
+        </ion-col>
+        <ion-col col-6>
+          <ion-item>
+            <p>Valor da Corrida</p>
+            <h2>{{trip.total_amount | currency : 'BRL' : 'symbol' :'1.2-2'}}</h2>
+          </ion-item>
+        </ion-col>
+        <ion-col col-6>
+          <ion-item>
+            <p>Forma Pagto.</p>
+            <h2>{{trip.payment_method == 'CASH' ? 'Dinheiro': 'Cartão de Crédito'}}</h2>
+          </ion-item>
+        </ion-col>
+        <ion-col col-6>
+          <ion-item>
+            <p>Você avaliou</p>
+            <h2>{{ trip.driver_rating }} estrelas</h2>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <ion-item>
+        <ion-icon name="ios-pin-outline" color="green" item-start></ion-icon>
+        <p>{{trip.origin_vicinity}}</p>
+      </ion-item>
+      <ion-item>
+        <ion-icon name="ios-pin-outline" color="red" item-start></ion-icon>
+        <p>{{trip.destination_vicinity}}</p>
+      </ion-item>
+      <ion-item>
+        <ion-avatar item-start>
+          <img [src]="trip.driver.avatar_url || 'assets/img/default-dp.png'">
+        </ion-avatar>
+        <h2>{{ trip.driver.name }} - {{ trip.driver.rating}} <ion-icon name='ios-star' color="warning"></ion-icon>
+        </h2>
+        <p>{{ trip.driver.car.name }}</p>
+      </ion-item>
+    </ion-list>
+  </ion-card>
+</ion-content>

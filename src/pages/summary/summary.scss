@@ -1,0 +1,18 @@
+page-summary {
+  .scroll-content{
+    background-color: #e3e3e3;
+  }
+ .rating-input{
+    font-size: 3.5rem;
+    letter-spacing: 3px;
+    margin-bottom: 0px;
+    margin-top: 0px;
+    padding-top: 6px;
+    .ion-md-star, .ion-ios-star{
+      color: #ffdd46;
+    }
+    .ion-md-star-outline, .ion-ios-star-outline{
+      color: #999;
+    }
+  }
+}

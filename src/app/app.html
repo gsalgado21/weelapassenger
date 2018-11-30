@@ -1,1 +1,18 @@
+<ion-menu #menu [content]="content">
+  <ion-content *ngIf="user">
+    <ion-toolbar color="primary" (tap)='goTo("UserPage")'>
+      <img class="user-avatar" [src]="user.avatar || 'assets/img/default-dp.png'">
+      <h3>{{user.name}}</h3>
+      <h4>{{user.email}}</h4>
+    </ion-toolbar>
+    <ion-list>
+      <button ion-item (tap)="goTo('HistoryPage')">
+        Suas Viagens
+      </button>
+      <button ion-item (tap)="logout()">
+        Sair
+      </button>
+    </ion-list>
+  </ion-content>
+</ion-menu>
 <ion-nav [root]="rootPage" #content swipeBackEnabled="false"></ion-nav>

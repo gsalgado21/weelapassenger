@@ -17,18 +17,19 @@ export class PlaceService {
 
   // search by address
   searchByAddress(address, lat, lng) {
-    let url = this.baseUrl + 'place/nearbysearch/json?key=' + this.apiKey
-        + '&keyword=' + encodeURI(address)
-        + '&location=' + lat + ',' + lng
-        + '&radius=50000';
+    let url = this.baseUrl + 'place/textsearch/json?key=' + this.apiKey
+      + '&query=' + encodeURI(address)
+      + '&location=' + lat + ',' + lng
+      + '&type=geocode' +
+      + '&radius=50000';
     return this.http.get(url).map(res => res.json())
   }
 
   // get direction between to points
   getDirection(lat1, lon1, lat2, lon2) {
     let url = this.baseUrl + 'directions/json?key=' + this.apiKey
-        + '&origin=' + lat1 + ',' + lon1
-        + '&destination=' + lat2 + ',' + lon2;
+      + '&origin=' + lat1 + ',' + lon1
+      + '&destination=' + lat2 + ',' + lon2;
     return this.http.get(url).map(res => res.json());
   }
 
@@ -42,7 +43,7 @@ export class PlaceService {
     lat2 = this.toRad(lat2);
 
     let a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+      Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
     let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     let d = R * c;
 
@@ -61,15 +62,15 @@ export class PlaceService {
    */
   formatAddress(address) {
     console.log(address);
-    let components = address.address_components;
-    let vicinity = components[0].short_name + ', ' + components[1].short_name;
+    //let components = address.address_components;
+    //let vicinity = components[0].short_name + ', ' + components[1].short_name;
 
     return {
       location: {
         lat: address.geometry.location.lat(),
         lng: address.geometry.location.lng()
       },
-      vicinity: vicinity
+      vicinity: address.formatted_address
     }
   }
 
@@ -105,5 +106,5 @@ export class PlaceService {
   getLocality() {
     return this.locality;
   }
-  
+
 }

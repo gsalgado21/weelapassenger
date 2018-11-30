@@ -3,7 +3,7 @@ page-tracking,
 .tracking {
   #map{
     height: 100%;
-    width:100%;
+    width: 100vw;
   }
   .tracking-info {
     position: absolute;
@@ -40,5 +40,9 @@ page-tracking,
         font-size: 2em;
       }
     }
+  }
+
+  .row{
+    background-color: #fff;
   }
 }

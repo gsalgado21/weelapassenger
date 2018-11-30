@@ -1,0 +1,53 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>Resumo da Corrida</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  <ion-card *ngIf="trip">
+    <ion-list>
+      <ion-item>
+        <h2>Método de Pagamento</h2>
+        <h2 item-end>{{ trip.payment_method == 'CASH' ? 'Dinheiro' : 'Cartão de Crédito' }}</h2>
+      </ion-item>
+      <ion-item>
+        <h2>Distância Percorrida</h2>
+        <h2 item-end> {{ trip.distance }} km</h2>
+      </ion-item>
+      <ion-item>
+        <h2>Duração da Corrida</h2>
+        <h2 item-end>{{durationTime() }} min</h2>
+      </ion-item>
+      <ion-item>
+        <h2>Valor da Corrida</h2>
+        <h2 item-end>{{ (trip.total_amount + trip.discount_amount) | currency : 'BRL' : 'symbol' :'1.2-2'}}</h2>
+      </ion-item>
+      <ion-item>
+        <h2>Desconto</h2>
+        <p *ngIf="trip.coupon">Cód. Promocional: {{trip.coupon.token}}</p>
+        <h2 item-end ion-text [color]="trip.discount_amount > 0 ? 'green' : ''">-{{ trip.discount_amount | currency :
+          'BRL' : 'symbol' :'1.2-2' }}</h2>
+      </ion-item>
+      <ion-item>
+        <h2>Valor Total</h2>
+        <h1 item-end ion-text color="primary">{{ trip.total_amount | currency : 'BRL' : 'symbol' :'1.2-2'}}</h1>
+      </ion-item>
+    </ion-list>
+  </ion-card>
+
+  <ion-card text-center *ngIf="trip">
+    <ion-card-content>
+      <p no-margin>Por favor, avalie o motorista <i class="req"></i></p>
+      <h2 class="rating-input">
+        <ion-icon *ngFor="let n of ratingRange; let i = index" [name]="i < rating ? 'star' : 'star-outline'" (tap)="rating = (i+1)"></ion-icon>
+      </h2>
+    </ion-card-content>
+  </ion-card>
+
+</ion-content>
+<ion-footer padding>
+  <button ion-button block (tap)="rateTrip()" [disabled]="!rating">
+    Avaliar Motorista & Finalizar Corrida
+  </button>
+</ion-footer>

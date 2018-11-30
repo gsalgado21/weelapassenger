@@ -14,6 +14,6 @@ export let SOS = "+919500707757";
 
 // NOTE: Please update your firebase configurations on src/app/app.module.ts
 
-export let GOOGLE_MAP_API_KEY = "AIzaSyAAeH42ZD5xodV_me4mqLr_dXlGIRMGrfM";
+export let GOOGLE_MAP_API_KEY = "AIzaSyAAeH42ZD5xodV_me4mqLr_dXlGIRMGrfM&language=pt-BR&region=BR";
 export let GOOGLE_MAP_BASE_URL = "https://maps.googleapis.com/maps/api/";
 export let DEFAULT_AVATAR = "http://placehold.it/150x150";

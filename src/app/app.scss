@@ -1,122 +1,94 @@
-// http://ionicframework.com/docs/v2/theming/
 
-// App Shared Imports
-// --------------------------------------------------
-// These are the imports which make up the design of this app.
-// By default each design mode includes these shared imports.
-// App Shared Sass variables belong in app.variables.scss.
-
-// position
-
-.header{
-  background: color($colors, primary)
-}
-
-
-.pull-left {
-  float: left;
-}
-
-.pull-right {
-  float: right;
-}
-
-.clear {
-  clear: both;
-}
-
-.rlt {
+i.req:after{
   position: relative;
+  display: inline;
+  content: '*';
+  color: rgb(207, 38, 38);
 }
 
-.padding-10 {
-  padding: 10px;
+.item, .item>.item-inner{
+  border-bottom-color: #ccc!important;
+  box-shadow: none!important;
 }
 
-.primary-bg {
-  background-color: color($colors, primary);
-  color: #fff;
+.list .item-input:last-child {
+  border-bottom-width: 0px!important;
 }
-
-.light {
-  color: color($colors, light);
-}
-
-
-
-// text style
-.bold {
-  font-weight: bold;
-}
-
-.italic {
-  font-style: italic;
-}
-
-.text-hint {
-  font-size: 0.8em;
-  color: #666;
-}
-
-.modal-bg {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.round {
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-// position
-.align-bottom {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  padding: 5px;
-}
-
-.list-no-border {
-
-  .item:first-child {
-    border: none;
-  }
-  .item:last-child {
-    border: none;
-  }
-
-  .item-inner {
-    border: none;
-  }
-}
-
-.list-full-border {
-  @extend .list-no-border;
-
-  .item,
-  .item:first-child {
-    border-bottom: 1px solid color($colors, border-color);
-
-    .item-inner {
-      border: none;
+ion-searchbar.searchbar-md, .searchbar-ios{
+    padding: 0px 4px;
+    background: transparent!important;
+    .searchbar-input{
+        box-shadow: none;
+        background-color: transparent!important;
+        padding: 8px 10px;
+        color: #fff;
+        font-size: 1.8rem;
+        &::placeholder { 
+            color: #eee;
+            opacity: 1;
+        }
     }
+    .searchbar-search-icon{
+        display: none;
+    }
+}
+
+ ion-menu{
+    .user-avatar{
+        height: 80px;
+        width: 80px;
+        object-fit: cover;
+    }
+    .menu-loader{
+        width: 100%;
+        margin: 20px auto;
+        height: 50px;
+        svg{
+         stroke: #fff!important;
+        }
+    }
+    .toolbar-content{
+        padding: 10px;
+        text-align: center;
+        color: #fff;
+        img{
+            border-radius: 100%;
+            width: 80px;
+            margin-bottom: 10px;
+        }
+        h3{
+            font-size: 1.2em;
+            margin: 2px auto;
+        }
+        h4{
+            font-size: 1.1em;
+            margin: 2px auto;
+        }
+    }
+    ion-toolbar.toolbar{
+        min-height: 157px!important;
+        .toolbar-background{
+            background-color: map-get($map: $colors, $key: primary);
+        }
+        color: #fff;
+    }
+    .menu-inner{
+        width: 250px!important;
+    }
+
+    ion-label{
+        font-size: 1.1em;
+        color:#33455a;
+    }
+}
+
+
+ion-popover{
+  background: rgba(255, 255, 255, 0.8);
+  .popover-content{
+    left: 10px!important;
+    right: 10px!important;
+    width: auto!important;
+    box-shadow: none!important;
   }
-}
-
-.circle {
-  border-radius: 50%;
-}
-
-// auth page
-.logo {
-  margin: 20px auto 0;
-  padding-top: 0.5em;
-  padding-bottom: 0.2em;
-  font-size: 2.5em;
-}
-
-a {
-  text-decoration: none;
 }

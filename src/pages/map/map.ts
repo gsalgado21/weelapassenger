@@ -1,93 +1,81 @@
 import { Component, ChangeDetectorRef } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { ViewController, NavParams, IonicPage } from 'ionic-angular';
 import { Geolocation } from '@ionic-native/geolocation';
 import { PlaceService } from "../../services/place-service";
-import { HomePage } from "../home/home";
-import { TripService } from "../../services/trip-service";
+import { Utils } from '../../services/utils';
 declare var google: any;
 
-
+@IonicPage()
 @Component({
   selector: 'page-map',
   templateUrl: 'map.html',
 })
 export class MapPage {
   map: any;
-
-  // pin address
   address: any;
   marker: any;
-  // marker position on screen
-  markerFromTop = 0;
-  markerFromLeft = 0;
 
-  constructor(public nav: NavController, private geolocation: Geolocation, public chRef: ChangeDetectorRef,
-              public navParams: NavParams, public placeService: PlaceService, public tripService: TripService) {
+  constructor(public view: ViewController, private geolocation: Geolocation, public chRef: ChangeDetectorRef,
+    public navParams: NavParams, public placeService: PlaceService, private utils: Utils) {
   }
 
-  // Load map only after view is initialized
   ionViewDidLoad() {
-    this.loadMap();
-
-    // set marker position in center of screen
-    // minus marker's size
-    this.markerFromTop = window.screen.height / 2 - 16;
-    this.markerFromLeft = window.screen.width / 2 - 8;
-  }
-
-  loadMap() {
-    // set current location as map center
-    this.geolocation.getCurrentPosition().then((resp) => {
-      let latLng = new google.maps.LatLng(resp.coords.latitude, resp.coords.longitude);
-
-      this.map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 16,
-        center: latLng,
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
-        mapTypeControl: false
-      });
-
-      this.marker = new google.maps.Marker({ map: this.map, position: latLng });
-      this.marker.setMap(this.map);
-
-      // get center's address
-      this.findPlace(latLng);
-
-      this.map.addListener('center_changed', (event) => {
-        let center = this.map.getCenter();
-        this.findPlace(center);
-      })
-    }).catch((error) => {
-      console.log('Error getting location', error);
+    this.utils.showLoading();
+    this.geolocation.getCurrentPosition({ timeout: 3000, maximumAge: Number.MAX_VALUE, enableHighAccuracy: true }).then(resp => {
+      this.loadMap(resp.coords.latitude, resp.coords.longitude);
+      this.utils.hideLoading();
+    }).catch(reject => {
+      this.utils.hideLoading();
+      console.log(reject);
+      this.loadMap(-23.0269805, -45.5521864)
     });
   }
 
-  // find address by LatLng
+  loadMap(lat, lng) {
+    let latLng = new google.maps.LatLng(lat, lng);
+    this.map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 16,
+      center: latLng,
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      disableDefaultUI: true
+    });
+
+    this.findPlace(latLng);
+
+    this.map.addListener('dragend', (event) => {
+      this.utils.showLoading();
+      setTimeout(() => {
+        let center = this.map.getCenter();
+        this.findPlace(center);
+      }, 400);
+    })
+    this.map.addListener('dragstart', (event) => {
+      this.address = null;
+    });
+  }
+
   findPlace(latLng) {
     let geocoder = new google.maps.Geocoder();
-    
-    this.marker.setMap(null);
-    this.marker = new google.maps.Marker({ map: this.map, position: latLng });
-    this.marker.setMap(this.map);
-
-    geocoder.geocode({'latLng': latLng}, (results, status) => {
+    geocoder.geocode({ 'latLng': latLng }, (results, status) => {
       if (status == google.maps.GeocoderStatus.OK) {
         this.address = results[0];
         this.chRef.detectChanges();
+        this.utils.hideLoading();
       }
     });
   }
 
-  // choose address and go back to home page
   selectPlace() {
     let address = this.placeService.formatAddress(this.address);
+    let attr = this.navParams.get('type');
+    let obj = {};
+    obj[attr + '_latitude'] = address.location.lat;
+    obj[attr + '_longitude'] = address.location.lng;
+    obj[attr + '_vicinity'] = address.vicinity;
+    this.view.dismiss(obj);
+  }
 
-    if (this.navParams.get('type') == 'origin') {
-      this.tripService.setOrigin(address.vicinity, address.location.lat, address.location.lng);
-    } else {
-      this.tripService.setDestination(address.vicinity, address.location.lat, address.location.lng);
-    }
-
-    this.nav.setRoot(HomePage);
+  dismiss() {
+    this.view.dismiss();
   }
 }

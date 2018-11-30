@@ -1,125 +1,104 @@
-page-home,
-.home {
-  // ion-input{
-  //   margin: 0;
-  // }
-  ion-header img{
-    height: 30px;
-    width: 30px;
-    border-radius: 100%;
-  }
-  .search-icon{
-    font-size:20px;
-  }
-  ion-input{
-    background: #eee;
-  }
-  .active img{
-    background: color($colors, secondary);
-  }
-  ion-col{
-    text-align: center
-  }
-  ion-col img{
-    width: 40px;
-    padding: 5px;
-    border-radius: 100%;
-  }
-  ion-col p { margin: 0}
-  ion-row{
-    background: #fff;
-    border-radius: 3px;
-    border: 1px solid #eee;
-  }
-  .list-md {
-    margin: -1px 0 0px;
-  }
-  .label-md{
-    margin: 13px -50px 13px 0;
-  }
-  .text-input-md{
-    font-size: 14px;
-    margin: 8px 5px;
-  }
-  #map {
-    width: 100%;
-  }
-
-  .map-overlay {
+page-home {
+  
+  .button-menutoggle{
     position: absolute;
-    top: 5px;
-    left:5px;
-    right: 5px;
-
-    ion-grid {
-      border-radius: 3px;
-
-      ion-col + ion-col {
-        border-left: 1px solid color($colors, border-color);
-      }
-    }
-  }
-
-  .vehicle-collapsed {
-    position: relative;
-
-    .bg {
-      min-height: 55px;
-      margin: 10px 10px;
-    }
-
-    .vehicle {
-      position: absolute;
-      top: 0;
-      box-shadow: 0 2px rgba(0, 0, 0, 0.1);
-
-      .item-inner {
-        border: none;
-      }
-    }
-  }
-
-  .modal-bg {
-    position: fixed;
-    top: 0;
+    top: 0px;
+    left: -6px;
     z-index: 1000;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    font-size: 2.4rem;
+    text-shadow: 0px 0px 6px rgba(0, 0, 0, .4);
+  }
 
-    .vehicles {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-
-      .round-btn,
-      .round-btn.active {
-        border-radius: 50%;
-        border: 1px solid color($colors, white);
-        background: none;
-
-        &.button-md {
-          height: 4.2rem;
-        }
+  .places-selector{
+    position: absolute;
+    z-index: 1000;
+    top: 6px;
+    left: 62px;
+    right: 6px;
+    border-radius: 6px;
+    overflow: hidden;
+    .item-md{
+      .item-inner{
+        padding-left: 0px;
+        margin-left: 0px;
       }
     }
   }
 
-  .item-block.vehicle {
-    padding-top: 5px;
-    padding-bottom: 5px;
 
-    &.active {
-      background: color($colors, primary);
+  .col.vehicle img{
+    max-width: 45px;
+    height: auto;
+    border-radius: 50%;
+    padding: 4px;
+  }
+
+  .active img{
+    background: color($colors, primary);
+    color: #fff;
+  }
+  .align-bottom{
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    right: 5px;
+    height: auto;
+    background-color: #fff;
+    border-radius: 6px;
+    padding: 4px 8px;
+    .item{
+      padding-left: 0px!important;
+      .item-inner{
+        border-bottom: 0px!important;
+        box-shadow: none!important;
+      }
     }
 
-    img {
-      width: 32px;
-      height: 32px;
+    .label{
+      margin-bottom: 0px!important;
     }
+    ion-spinner{
+      margin-left: -30px;
+      min-height: 60px;
+    }
+    ion-spinner * {
+      width: 60px;
+      height: 60px;
+      stroke: map-get($map: $colors, $key: primary);
+      fill: #f4f4f4;
+    }
+  }
 
-    .fee {
-      font-weight: bold;
+  #map {
+    width: 100vw;
+  }
+}
+
+popover-home{
+  .searchingCircle{
+    position: relative;
+    display: inline-block;
+    width: 80px;
+    height: 80px;
+    border: 18px solid rgb(66, 218, 231);
+    border-radius: 50%;
+    margin: 30px auto;
+    background-color: map-get($map: $colors, $key: primary);
+    animation-name: pulse;
+    animation-duration: .8s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+  }
+
+  @keyframes pulse{
+    0%{
+      box-shadow: 0px 0px 2px 0px rgba(66, 218, 231,.3);
+    }
+    65%{
+      box-shadow: 0px 0px 2px 23px rgba(66, 218, 231,.3);
+    }
+    90%{
+      box-shadow: 0px 0px 2px 23px rgba(66, 218, 231,0);
     }
   }
 }

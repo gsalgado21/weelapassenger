@@ -1,1 +1,15 @@
-page-register{}
+page-register {
+  .card.avatar{
+    position: relative;
+    margin: 10px auto;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    img{
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+    }
+  
+  }
+} 

@@ -1,39 +1,13 @@
 import { Injectable } from "@angular/core";
-import { AngularFireDatabase } from "@angular/fire/database";
-import { map } from 'rxjs/operators';
 
 @Injectable()
 export class DriverService {
 
-  constructor(public db: AngularFireDatabase) {
-
-  }
-
-  // get driver by id
-  getDriver(id) {
-    return this.db.object('drivers/' + id).valueChanges();
-  }
-
-  // get driver position
-  getDriverPosition(locality, vehicleType, id) {
-    return this.db.object('localities/' + locality + '/' + vehicleType + '/' + id).valueChanges();
-  }
-
-  getActiveDriver(locality, vehicleType) {
-    return this.db.list('localities/' + locality + '/' + vehicleType).snapshotChanges().pipe(map(x => x.map(c => ({ uid: c.payload.key, ...c.payload.val() }))));
-  }
-
-  // calculate vehicle angle
-  calcAngle(oldLat, oldLng, lat, lng) {
-    let brng = Math.atan2(lat - oldLat, lng - oldLng);
-    brng = brng * (180 / Math.PI);
-
-    return brng;
-  }
+  constructor() { }
 
   // return icon suffix by angle
-  getIconWithAngle(vehicle) {
-    let angle = this.calcAngle(vehicle.oldLat, vehicle.oldLng, vehicle.lat, vehicle.lng);
+  getIconWithAngle(oldLat, oldLng, lat, lng) {
+    let angle = (Math.atan2(lat - oldLat, lng - oldLng)) * (180 / Math.PI);
 
     if (angle >= -180 && angle <= -160) {
       return '_left';

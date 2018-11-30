@@ -1,0 +1,73 @@
+{
+  "project_info": {
+    "project_number": "135715783299",
+    "firebase_url": "https://weela-agilez.firebaseio.com",
+    "project_id": "weela-agilez",
+    "storage_bucket": "weela-agilez.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:135715783299:android:e0c7855801373a22",
+        "android_client_info": {
+          "package_name": "com.weela.driver"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "135715783299-mhl9cul5v8njtm73igv8bs96o7javml7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCaisP5Fj5gYsZQQCvDqDw76zQ-1qH2amw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:135715783299:android:a0ca75e41630569f",
+        "android_client_info": {
+          "package_name": "com.weela.passenger"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "135715783299-mhl9cul5v8njtm73igv8bs96o7javml7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCaisP5Fj5gYsZQQCvDqDw76zQ-1qH2amw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

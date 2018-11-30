@@ -1,104 +1,98 @@
-import { Component } from '@angular/core';
-import { NavController, LoadingController, NavParams } from 'ionic-angular';
+import { Component, ViewChild } from '@angular/core';
+import { ViewController, NavParams, IonicPage, Searchbar } from 'ionic-angular';
 import { PlaceService } from '../../services/place-service';
 import { Geolocation } from '@ionic-native/geolocation';
-import { HomePage } from "../home/home";
-import { MapPage } from "../map/map";
-import { TripService } from "../../services/trip-service";
+import { Utils } from "../../services/utils";
 
+@IonicPage()
 @Component({
   selector: 'page-places',
   templateUrl: 'places.html'
 })
 export class PlacesPage {
-  // all places
   places: any = [];
-
-  // search keyword
   keyword = '';
-
-  // lat & lon
   lat: number;
   lon: number;
-
-  // loading object
-  loading: any;
-
-  // page loaded flag
   pageLoaded = false;
+  @ViewChild(Searchbar) searchbar: Searchbar;
 
-  constructor(public nav: NavController, public placeService: PlaceService, public geolocation: Geolocation,
-              public loadingCtrl: LoadingController, public navParams: NavParams, public tripService: TripService) {
-    this.loading = this.loadingCtrl.create({
-      content: 'Please wait...'
-    });
-
+  constructor(public view: ViewController, public placeService: PlaceService, public geolocation: Geolocation, private utils: Utils,
+    public navParams: NavParams) {
     this.geolocation.getCurrentPosition().then((resp) => {
       this.lat = resp.coords.latitude;
       this.lon = resp.coords.longitude;
-      this.search();
     }).catch((error) => {
       console.log('Error getting location', error);
     });
   }
 
-  // show search input
-  ionViewDidEnter() {
-    this.pageLoaded = true;
+  ionViewDidLoad() {
+    this.searchbar.initFocus();
   }
 
-  // hide search input
+  ionViewDidEnter() {
+    this.pageLoaded = true;
+    setTimeout(() => {
+      this.searchbar.setFocus();
+    }, 300);
+  }
+
   ionViewWillLeave() {
     this.pageLoaded = false;
   }
 
-  // choose a place
   selectPlace(place) {
     console.log(place);
-    if (this.navParams.get('type') == 'origin') {
-      this.tripService.setOrigin(place.vicinity, place.geometry.location.lat, place.geometry.location.lng);
-      console.log("origin set");
-    } else {
-      this.tripService.setDestination(place.vicinity, place.geometry.location.lat, place.geometry.location.lng);
-      console.log("destination set");
-    }
-    this.nav.setRoot(HomePage);
+    let attr = this.navParams.get('type');
+    let obj = {};
+    obj[attr + '_latitude'] = place.geometry.location.lat;
+    obj[attr + '_longitude'] = place.geometry.location.lng;
+    obj[attr + '_vicinity'] = place.formatted_address;
+    this.view.dismiss(obj);
   }
 
-  // clear search input
   clear() {
     this.keyword = '';
     this.search();
   }
 
-  // search by address
-  search() {
-    this.showLoading();
-    this.placeService.searchByAddress(this.keyword, this.lat, this.lon).subscribe(result => {
-      this.hideLoading();
-      this.places = result.results;
-    });
-    setTimeout(()=>{ this.hideLoading() }, 5000);
+  streetName(place) {
+    return place.formatted_address.substring(0, place.formatted_address.indexOf('-'));
   }
 
-  // calculate distance from a place to current position
+  addressName(place) {
+    return place.formatted_address.substring(place.formatted_address.indexOf('-') + 2);
+  }
+
+  dismiss() {
+    this.view.dismiss();
+  }
+
+  // search by address
+  search() {
+    if (this.keyword && this.keyword.length > 0) {
+      this.placeService.searchByAddress(this.keyword, this.lat, this.lon).subscribe(result => {
+        console.log('searchByAddress', result);
+        this.places = result.results;
+        this['loader'] = false;
+      }, err => {
+        this.utils.showError();
+        this['loader'] = false;
+      });
+    } else {
+      this.places = [];
+      this['loader'] = false;
+    }
+  }
+
   calcDistance(place) {
     return this.placeService.calcCrow(place.geometry.location.lat, place.geometry.location.lng, this.lat, this.lon).toFixed(1);
   }
 
-  showLoading() {
-    this.loading = this.loadingCtrl.create({
-      content: 'Please wait...'
-    });
-    this.loading.present();
-  }
-
-  hideLoading() {
-    this.loading.dismiss();
-  }
-
-  // open map page
   openMap() {
-    this.nav.push(MapPage, {type: this.navParams.get('type')});
+    this.utils.showModal('MapPage', { type: this.navParams.get('type') }).onWillDismiss(data => {
+      if (data) this.view.dismiss(data);
+    });
   }
 }

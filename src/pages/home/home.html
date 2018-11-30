@@ -1,59 +1,62 @@
 <ion-content>
-  <div id="{{ mapId }}" [ngStyle]="{height: '85%'}"></div>
-  <!-- <ion-list>
-      <ion-item>
-        <ion-label>{{'FROM' | translate}}</ion-label>
-        <ion-input type="text"></ion-input>
-        <button ion-button item-right>Pick</button>
-      </ion-item>
-    </ion-list> -->
-  <!--Choose origin and destination places-->
-  <div class="map-overlay">
-    <div style="top:0; right: 0; padding: 4px;">
-        <button ion-button (click)="goProfilePage()"><ion-icon name="contact"></ion-icon></button>
+  <div id="map_home" [ngStyle]="{height: '100%'}"></div>
+
+  <button ion-button menuToggle large clear color="white">
+    <ion-icon name="menu"></ion-icon>
+  </button>
+
+  <ion-list no-lines class="places-selector">
+    <ion-item (tap)="choosePlace('origin')">
+      <ion-icon item-left name="ios-pin-outline" color="green"></ion-icon>
+      <ion-input disabled type="text" placeholder="Qual o local de partida?" [value]="trip.origin_vicinity"></ion-input>
+    </ion-item>
+    <ion-item (tap)="choosePlace('destination')">
+      <ion-icon item-left name="ios-pin-outline" color="red"></ion-icon>
+      <ion-input disabled type="text" placeholder="Para onde você vai?" [(ngModel)]="trip.destination_vicinity"></ion-input>
+    </ion-item>
+  </ion-list>
+
+  <div class="align-bottom" [hidden]="!hasOriginAndDestination()">
+    <div text-center [hidden]="!this.loading">
+      <ion-spinner></ion-spinner>
+      <p ion-text color="primary">Simulando Trajeto...</p>
     </div>
 
-  </div>
+    <div [hidden]="this.loading" text-center>
+      <p no-margin>Valor Estimado</p>
+      <h2 no-margin *ngIf="!trip.discount_amount">{{ trip.total_amount | currency : 'BRL' : 'symbol' :'1.2-2' }}</h2>
 
-  <div class="align-bottom">
-      <ion-grid class="common-bg" [hidden]="!destination">
-          <ion-row>
-            <ion-col (click)="choosePaymentMethod1()">
-              <ion-icon name="ios-cash-outline" color="gray"></ion-icon>
-              <span ion-text color="gray">{{ getPaymentMethod() }}</span>
-            </ion-col>
-            <ion-col (click)="showPromoPopup()" *ngIf="destination">
-              <ion-icon name="ios-create-outline" color="gray"></ion-icon>
-              <span ion-text color="gray">{{'PROMO' | translate}}</span>
-            </ion-col>
-            <ion-col (click)="showNotePopup()">
-              <ion-icon name="ios-create-outline" color="gray"></ion-icon>
-              <span ion-text color="gray">{{'NOTE' | translate}}</span>
-            </ion-col>
-          </ion-row>
-        </ion-grid>  
-    <ion-list no-lines>
-      <ion-item>
-        <ion-input disabled type="text" value="{{origin ? origin.vicinity : '' }}"></ion-input>
-        <button item-right (click)="chooseOrigin()"><ion-icon name="search" class="search-icon"></ion-icon></button>
-      </ion-item>
-      <ion-item>
-        <ion-input disabled type="text" placeholder="where you want to go?" value="{{ destination ? destination.vicinity : '' }}"></ion-input>
-        <button item-right (click)="chooseDestination()"><ion-icon name="search" class="search-icon"></ion-icon></button>
-      </ion-item>
-    </ion-list>
-    <ion-row>
-      <ion-col *ngIf="distanceText!=''" ><ion-icon name="plane"></ion-icon> <b>{{ distanceText }}</b></ion-col>
-      <ion-col *ngIf="durationText!=''"><ion-icon name="time"></ion-icon> <b>{{durationText}}</b></ion-col>
-    </ion-row>
-    <ion-row [hidden]="!destination">
-      <ion-col *ngFor="let vehicle of vehicles; let i = index" [ngClass]="{'active': vehicle.active}" (click)="chooseVehicle(i)">
-          <!-- <img src="assets/img/icon/{{ vehicle.icon }}.svg"> -->
-          <img src="{{ vehicle.icon }}">
-          <p>{{ vehicle.name }} ( {{currency }}{{ vehicle.fee }} )</p>
+      <div *ngIf="trip.discount_amount">
+        <h5 no-margin><ion-note><s>{{ trip.total_amount | currency : 'BRL' : 'symbol' :'1.2-2' }}</s></ion-note></h5>
+        <h2 no-margin>{{ trip.total_amount - trip.discount_amount | currency : 'BRL' : 'symbol' :'1.2-2' }}</h2>
+      </div>
+    </div>
+
+    <ion-row no-margin justify-content-center [hidden]="this.loading">
+      <ion-col col-6 no-padding>
+        <ion-item>
+          <p no-margin>Forma de Pagto</p>
+          <h2 *ngIf="trip.payment_method == 'CASH'" no-margin>
+            <ion-icon name="ios-cash" color="green"></ion-icon> DINHEIRO
+          </h2>
+          <h2 *ngIf="trip.payment_method == 'CREDIT_CARD'" no-margin>
+            <ion-icon name="ios-card" color="warning"></ion-icon> CARTÃO DE CRÉDITO
+          </h2>
+        </ion-item>
+      </ion-col>
+      <ion-col col-6 no-padding>
+        <ion-item (tap)="showPromoPopup()">
+          <p no-margin>Cupom de Desconto</p>
+          <h2 *ngIf="!trip.coupon_token" no-margin>
+            <ion-note>Informar cupom <ion-icon name="ios-arrow-down" small></ion-icon>
+            </ion-note>
+          </h2>
+          <h2 *ngIf="trip.coupon_token" no-margin>
+            <ion-icon name="ios-create"></ion-icon> {{ trip.coupon_token }}
+          </h2>
+        </ion-item>
       </ion-col>
     </ion-row>
-    <button ion-button block color="primary" [hidden]="destination" (click)="chooseDestination()">{{'RIDE_NOW' | translate}}</button>
-    <button ion-button block color="primary" [hidden]="!destination" (click)="book()">{{ locateDriver == false ? 'RIDE NOW':'Locating Drivers'}} <ion-spinner name="dots" color="light" [hidden]="!locateDriver"></ion-spinner></button>
+    <button ion-button margin-top block [hidden]="this.loading" (tap)="requestCar()">SOLICITAR CARRO</button>
   </div>
 </ion-content>

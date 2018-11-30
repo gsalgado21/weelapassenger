@@ -1,120 +1,65 @@
-import { NgModule, ErrorHandler } from '@angular/core';
+import { NgModule, LOCALE_ID, ErrorHandler } from '@angular/core';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
+import { registerLocaleData } from '@angular/common';
+import localePtBr from '@angular/common/locales/pt';
+registerLocaleData(localePtBr);
 import { MyApp } from './app.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { HttpModule } from '@angular/http';
 import { Geolocation } from '@ionic-native/geolocation';
+import { File } from '@ionic-native/file';
+import { FileTransfer } from '@ionic-native/file-transfer';
 import { IonicStorageModule } from '@ionic/storage';
-
-// Import the AF2 Module
-import { AngularFireModule } from '@angular/fire';
-import { AngularFireDatabaseModule } from '@angular/fire/database';
-import { AngularFireAuthModule } from '@angular/fire/auth';
-
-// Import moment module
+import { HeaderColor } from '@ionic-native/header-color';
 import { MomentModule } from 'angular2-moment';
-
-// import services
-import { DriverService } from '../services/driver-service';
-
+import { AuthService2 } from "../services/auth2-service";
+import { ApiService } from "../services/api-service";
+import { HttpService } from "../services/http-service";
+import { Utils } from "../services/utils";
+import { HttpClientModule } from '@angular/common/http';
+import { Camera } from '@ionic-native/camera';
+import { FCM } from '@ionic-native/fcm';
+import { Device } from '@ionic-native/device';
 import { PlaceService } from '../services/place-service';
-import { TripService } from '../services/trip-service';
-import { SettingService } from "../services/setting-service";
-import { DealService } from "../services/deal-service";
-import { AuthService } from "../services/auth-service";
-
-
-import { HomePage } from '../pages/home/home';
-import { LoginPage } from '../pages/login/login';
-import { PaymentMethodPage } from '../pages/payment-method/payment-method';
-import { PlacesPage } from '../pages/places/places';
-import { RegisterPage } from '../pages/register/register';
-import { TrackingPage } from '../pages/tracking/tracking';
-import { MapPage } from "../pages/map/map";
-import { UserPage } from '../pages/user/user';
-
-import { HttpClientModule, HttpClient } from '@angular/common/http';
-import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
-import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-export function createTranslateLoader(http: HttpClient) {
-  return new TranslateHttpLoader(http, './assets/lang/', '.json');
-}
-
-// export const firebaseConfig = {
-//   apiKey: "AIzaSyASfN_OVXgjuLbKKv6TKul-1S14joHFzww",
-//   authDomain: "ionfiretaxi.firebaseapp.com",
-//   databaseURL: "https://ionfiretaxi.firebaseio.com",
-//   projectId: "ionfiretaxi",
-//   storageBucket: "ionfiretaxi.appspot.com",
-//   messagingSenderId: "493104185856"
-// };
-
-export const firebaseConfig = {
-  apiKey: "AIzaSyAAeH42ZD5xodV_me4mqLr_dXlGIRMGrfM",
-  authDomain: "weela-agilez.firebaseapp.com",
-  databaseURL: "https://weela-agilez.firebaseio.com",
-  projectId: "weela-agilez",
-  storageBucket: "weela-agilez.appspot.com",
-  messagingSenderId: "135715783299"
-};
 
 @NgModule({
-  declarations: [
-    MyApp,
-    HomePage,
-    LoginPage,
-    PaymentMethodPage,
-    PlacesPage,
-    RegisterPage,
-    TrackingPage,
-    MapPage,
-    UserPage,
-  ],
+  declarations: [MyApp],
   imports: [
     BrowserModule,
     HttpModule,
     IonicStorageModule.forRoot(),
     HttpClientModule,
-    TranslateModule.forRoot({
-      loader: {
-        provide: TranslateLoader,
-        useFactory: createTranslateLoader,
-        deps: [HttpClient]
-      }
-    }),
-    AngularFireModule.initializeApp(firebaseConfig),
-    AngularFireDatabaseModule,
-    AngularFireAuthModule,
     MomentModule,
     IonicModule.forRoot(MyApp, {
-      mode: 'md'
+      mode: 'md',
+      monthNames: ['janeiro', 'fevereiro', 'mar\u00e7o', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'],
+      monthShortNames: ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'],
+      dayNames: ['domingo', 'segunda-feira', 'ter\u00e7a-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sabado'],
+      dayShortNames: ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab'],
+      backButtonText: ''
     })
   ],
   bootstrap: [IonicApp],
-  entryComponents: [
-    MyApp,
-    HomePage,
-    LoginPage,
-    PaymentMethodPage,
-    PlacesPage,
-    RegisterPage,
-    TrackingPage,
-    MapPage,
-    UserPage,
-  ],
+  entryComponents: [MyApp],
   providers: [
     StatusBar,
     SplashScreen,
     Geolocation,
-    DriverService,
+    HeaderColor,
+    Utils,
+    HttpService,
+    AuthService2,
+    ApiService,
     PlaceService,
-    TripService,
-    SettingService,
-    DealService,
-    AuthService,
-    { provide: ErrorHandler, useClass: IonicErrorHandler }
+    File,
+    FileTransfer,
+    Camera,
+    FCM,
+    Device,
+    { provide: ErrorHandler, useClass: IonicErrorHandler },
+    { provide: LOCALE_ID, useValue: 'pt-BR' }
   ]
 })
 export class AppModule {

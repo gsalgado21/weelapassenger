@@ -1,57 +1,51 @@
 import { Component } from '@angular/core';
-import { NavController, AlertController, LoadingController, ToastController } from 'ionic-angular';
-import { RegisterPage } from '../register/register';
-import { HomePage } from '../home/home'
-import { AuthService } from "../../services/auth-service";
-import * as firebase from 'firebase';
-import { ENABLE_SIGNUP } from '../../services/constants';
-import { TranslateService } from '@ngx-translate/core';
+import { NavController, IonicPage, MenuController } from 'ionic-angular';
+import { Utils } from "../../services/utils";
+import { AuthService2 } from "../../services/auth2-service";
+import { ApiService } from '../../services/api-service';
 
+@IonicPage()
 @Component({
   selector: 'page-login',
   templateUrl: 'login.html'
 })
 export class LoginPage {
-  email: string = "";
-  password: string = "";
-  isRegisterEnabled:any = true;
-  constructor(public nav: NavController, public authService: AuthService, public alertCtrl: AlertController,public loadingCtrl: LoadingController, public toast: ToastController, public translate: TranslateService) {
-    this.isRegisterEnabled = ENABLE_SIGNUP;
+  user: any = {};
+
+  constructor(public nav: NavController, private menu: MenuController, public authService: AuthService2, private utils: Utils, private api: ApiService) { }
+
+
+  signin() {
+    this.utils.showLoading('Autenticando..');
+    this.authService.login({ email: this.user.email, password: this.user.password }).subscribe(data => {
+      this.utils.hideLoading();
+      if (data && data.result == 'success') {
+        this.nav.setRoot('HomePage');
+        this.menu.enable(true);
+        this.authService.getUser().subscribe(user => {
+          this.utils.events.publish('menu:user', user);
+        })
+      } else {
+        this.utils.showAlert(null, 'Usuário e/ou senha inválidos', [{ text: 'Ok', role: 'cancel' }], false);
+      }
+    }, error => {
+      this.utils.showError(error.message);
+    });
   }
 
-  signup() {
-    this.nav.setRoot(RegisterPage);
-  }
-  reset(){
-    if(this.email){
-      firebase.auth().sendPasswordResetEmail(this.email)
-      .then( data =>
-        this.toast.create({ message:'Please check your mail', duration: 3000}).present())
-      .catch( err => this.toast.create({ message: err.message, duration: 3000}).present())
+  reset() {
+    if (!this.user.email) {
+      this.utils.showAlert('Email Inválido', 'Informe o email no campo de login', [], true);
+    } else {
+      this.api.forgetPassword(this.user.email).subscribe(data => {
+        if (data && data.result == 'success') {
+          this.utils.showAlert('Email de Redefinição Enviado', 'Verifique sua caixa de entrada', [{ text: 'Ok', role: 'cancel' }], false);
+        } else {
+          this.utils.showAlert('Email Inválido', 'O email informado não consta na base de dados', [], true);
+        }
+      }, err => {
+        this.utils.showAlert('Email Inválido', 'O email informado não consta na base de dados', [], true);
+      })
     }
-  }
-
-  login() {
-    if(this.email.length == 0 || this.password.length == 0){
-      this.alertCtrl.create({ subTitle:'Invalid Credentials', buttons: ['ok']}).present();
-    }
-    else{
-      let loading = this.loadingCtrl.create({ content: 'Authenticating...'});
-      loading.present();
-  
-      this.authService.login(this.email, this.password).then(authData => {
-        loading.dismiss();
-        this.nav.setRoot(HomePage);
-      }, error => {
-        // in case of login error
-        loading.dismiss();
-        let alert = this.alertCtrl.create({
-          message: error.message,
-          buttons: ['OK']
-        });
-        alert.present();
-      });
-    }
-
   }
 }

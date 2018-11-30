@@ -1,19 +1,21 @@
 <ion-header>
-
-  <ion-navbar color="white">
-    <ion-title>{{ address ? address.formatted_address : '' }}</ion-title>
+  <ion-navbar color="primary">
+    <ion-title>Defina o Local no Mapa</ion-title>
     <ion-buttons end>
-      <button ion-button (click)="selectPlace()">
-        Done
+      <button ion-button icon-only (tap)="dismiss()">
+        <ion-icon name="close"></ion-icon>
       </button>
     </ion-buttons>
   </ion-navbar>
-
 </ion-header>
 
-
 <ion-content>
+  <div padding class="address-description" [hidden]="!address">
+    <p>Endereço</p>
+    <h2>{{ address ? address.formatted_address : '' }}</h2>
+    <button ion-button block (tap)="selectPlace()">
+      CONFIRMAR
+    </button>
+  </div>
   <div #map id="map"></div>
-  <img class="marker" src="assets/img/pin.png" alt=""
-       [ngStyle]="{top: markerFromTop + 'px', left: markerFromLeft + 'px'}">
 </ion-content>

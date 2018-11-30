@@ -3,66 +3,88 @@ import { Platform } from 'ionic-angular';
 import { ViewChild } from '@angular/core';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
-
-// import pages
-import { LoginPage } from '../pages/login/login';
-import { HomePage } from '../pages/home/home';
-
-import { AngularFireAuth } from "@angular/fire/auth";
-import { AuthService } from "../services/auth-service";
-import { UserPage } from "../pages/user/user";
-
-import { TranslateService } from '@ngx-translate/core';
-
-// end import pages
+import { HeaderColor } from '@ionic-native/header-color';
+import { AuthService2 } from "../services/auth2-service";
+import { Utils } from "../services/utils";
+import { FCM } from '@ionic-native/fcm';
+import { ApiService } from '../services/api-service';
 
 @Component({
   templateUrl: 'app.html',
   queries: {
-    nav: new ViewChild('content')
+    nav: new ViewChild('content'),
+    menu: new ViewChild('menu')
   }
 })
 
 export class MyApp {
   rootPage: any;
   nav: any;
+  menu: any;
   user = {};
 
-  constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, public afAuth: AngularFireAuth,
-    public authService: AuthService, public translate: TranslateService) {
-    this.translate.setDefaultLang('pt');
-    this.translate.use('pt');
+  constructor(private platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, api: ApiService, private fcm: FCM,
+    public authService: AuthService2, headerColor: HeaderColor, public utils: Utils) {
+
+
+
     platform.ready().then(() => {
-      // Okay, so the platform is ready and our plugins are available.
-      // Here you can do any higher level native things you might need.
-      statusBar.styleDefault();
+      this.initFCM();
+      this.menu.enable(false);
+      statusBar.overlaysWebView(false);
+      statusBar.backgroundColorByHexString("#268790");
+      headerColor.tint('#268790');
       splashScreen.hide();
-      
-      //afAuth.auth.signOut();
-      
-      // check for login stage, then redirect
-      afAuth.authState.take(1).subscribe(authData => {
-        console.log(authData);
-        if (authData) {
-          this.nav.setRoot(HomePage);
+      this.authService.getUser().subscribe(data => {
+        if (data) {
+          this.user = data;
+          this.menu.enable(true);
+          this.rootPage = 'HomePage';
         } else {
-          this.nav.setRoot(LoginPage);
+          this.rootPage = 'LoginPage'
         }
       });
-
-      // get user data
-      afAuth.authState.subscribe(authData => {
-        if (authData) {
-          this.user = authService.getUserData();
-        }
+      this.utils.events.subscribe('menu:user', (user) => {
+        this.user = user;
       });
     });
   }
 
-  // view current user profile
-  viewProfile() {
-    this.nav.push(UserPage, {
-      user: this.user
+  goTo(page) {
+    this.menu.close().then(() => {
+      this.nav.push(page);
     });
+  }
+
+  logout() {
+    this.authService.logout().subscribe(() => {
+      this.menu.close().then(() => {
+        this.nav.setRoot('LoginPage');
+        this.menu.enable(false);
+      });
+    });
+  }
+
+
+  private initFCM() {
+    if (this.platform.is('cordova')) {
+      this.fcm.getToken().then(token => {
+        console.log(token);
+        localStorage.setItem('device_token', token);
+      });
+      this.fcm.onTokenRefresh().subscribe(token => {
+        console.log(token);
+        localStorage.setItem('device_token', token);
+      });
+      let _self = this;
+      this.fcm.onNotification().subscribe((data) => {
+        console.log('notificação', data)
+        if (data.wasTapped) { //backgroudn
+          console.log('chegou background');
+        } else { //foreground
+          console.log('chegou foregroud');
+        }
+      });
+    }
   }
 }

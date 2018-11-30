@@ -1,0 +1,18 @@
+page-history {
+  .label{
+    margin-bottom: 4px!important;
+    margin-top: 4px!important;
+    white-space:unset!important;
+  }
+  .scroll-content{
+    background-color: #e3e3e3;
+  }
+  .card{
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+
+  .item-md ion-icon[item-start] + .item-inner{
+    margin-left: 0px;
+  }
+}

@@ -1,13 +1,14 @@
 import { Component } from '@angular/core';
-import { NavController, Platform, ModalController, AlertController, NavParams } from 'ionic-angular';
-import { DriverService } from '../../services/driver-service';
-import { HomePage } from "../home/home";
-import { TripService } from "../../services/trip-service";
-import { POSITION_INTERVAL, TRIP_STATUS_GOING, SOS } from "../../services/constants";
+import { NavController, Platform, ModalController, AlertController, IonicPage } from 'ionic-angular';
+import { POSITION_INTERVAL } from "../../services/constants";
 import { PlaceService } from "../../services/place-service";
+import { ApiService } from '../../services/api-service';
+import { ServerSocket } from '../../services/server-socket';
+import { Utils } from '../../services/utils';
 
 declare var google: any;
 
+@IonicPage()
 @Component({
   selector: 'page-tracking',
   templateUrl: 'tracking.html'
@@ -17,163 +18,149 @@ export class TrackingPage {
   map: any;
   trip: any = {};
   driverTracking: any;
-  marker: any;
   tripStatus: any;
-  sos: any;
   alertCnt: any = 0;
 
-  constructor(public nav: NavController, public driverService: DriverService, public platform: Platform, public navParams: NavParams, public tripService: TripService, public placeService: PlaceService, public modalCtrl: ModalController, public alertCtrl: AlertController) {
-    this.sos = SOS;
+  driver_marker: any;
+  passenger_marker: any;
+  origin_marker: any;
+  destination_marker: any;
+  private websocketSubscription: any;
+
+  constructor(public nav: NavController, private api: ApiService, private utils: Utils, public platform: Platform, private socket: ServerSocket, public placeService: PlaceService, public modalCtrl: ModalController, public alertCtrl: AlertController) {
   }
 
   ionViewDidLoad() {
-    let tripId;
-    if (this.navParams.get('tripId'))
-      tripId = this.navParams.get('tripId')
-    else
-      tripId = this.tripService.getId();
-
-    this.tripService.getTrip(tripId).take(1).subscribe((snapshot: any) => {
-      this.trip = snapshot;
-      console.log('getTrip', snapshot)
-      this.driverService.getDriver(snapshot.driverId).take(1).subscribe(snap => {
-        console.log(snap);
-        this.driver = snap;
-        this.watchTrip(tripId);
-        // init map
+    this.api.getTripInProgress().subscribe(data => {
+      if (data && data.result == 'success') {
+        this.trip = data.trip;
+        this.driver = data.trip.driver;
+        this.watchTrip(data.trip.id);
         this.loadMap();
-      })
-    });
-
+      }
+    })
   }
 
   ionViewWillLeave() {
     clearInterval(this.driverTracking);
+    if (this.websocketSubscription) this.websocketSubscription.unsubscribe();
   }
 
   watchTrip(tripId) {
-    this.tripService.getTrip(tripId).subscribe((snapshot: any) => {
-      this.tripStatus = snapshot.status;
-    });
-  }
-
-  showRateCard() {
-    let final = this.trip.fee - (this.trip.fee * (parseInt(this.trip.discount) / 100));
-    let message = '<p>Fee: ' + this.trip.fee + '<br>Promo: ' + this.trip.promocode + '<br> Discount (%): ' + this.trip.discount + '<br/>Payment Method: ' + this.trip.paymentMethod + '</p><h2>' + this.trip.currency + ' ' + final + '</h2>';
-    this.alertCtrl.create({
-      message: message,
-      enableBackdropDismiss: false,
-      buttons: [{
-        text: 'Rate Trip',
-        handler: data => {
-          this.showRatingAlert();
+    if (!this.websocketSubscription)
+      this.websocketSubscription = this.socket.connect().subscribe((data) => {
+        let resp = JSON.parse(data);
+        if (typeof resp.message == 'object' && resp.message.trip_id.toString() == tripId.toString()) {
+          if (resp.message.status == 'CANCELED') {
+            this.utils.showAlert('Corrida Cancelada', 'A corrida foi cancelada pelo motorista', [{ text: 'Ok', role: 'cancel' }], false);
+            this.nav.setRoot('HomePage');
+          } else if (resp.message.status == 'GOING') {
+            this.passenger_marker.setMap(null);
+            this.trip.origin_latitude = this.trip.origin_longitude = null;
+            this.updateMarkers();
+            this.trip.status = 'GOING';
+          } else if (resp.message.status == 'DONE') {
+            this.nav.setRoot('SummaryPage');
+          }
         }
-      }],
-    }).present();
-  }
-
-  showRatingAlert() {
-    console.log(this.trip, this.driver);
-    let alert = this.alertCtrl.create({
-      title: 'Rate Trip',
-      enableBackdropDismiss: false
-    });
-    alert.addInput({ type: 'radio', label: 'Excellent', value: '5', checked: true });
-    alert.addInput({ type: 'radio', label: 'Good', value: '4' });
-    alert.addInput({ type: 'radio', label: 'OK', value: '3' });
-    alert.addInput({ type: 'radio', label: 'Bad', value: '2' });
-    alert.addInput({ type: 'radio', label: 'Worst', value: '1' });
-
-    alert.addButton({
-      text: 'Cancel', handler: () => {
-        this.nav.setRoot(HomePage)
-      }
-    });
-    alert.addButton({
-      text: 'OK',
-      handler: data => {
-        this.tripService.rateTrip(this.trip.$key, data).then(() => {
-          this.nav.setRoot(HomePage)
-        });
-      }
-    });
-    alert.present();
-
+      });
   }
 
   loadMap() {
-    let latLng = new google.maps.LatLng(this.trip.origin.location.lat, this.trip.origin.location.lng);
+    let latLng = new google.maps.LatLng(this.trip.origin_latitude, this.trip.origin_longitude);
 
     let mapOptions = {
       center: latLng,
-      zoom: 15,
+      zoom: 14,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
-      mapTypeControl: false,
-      streetViewControl: false
+      disableDefaultUI: true
     }
 
     this.map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
-    new google.maps.Marker({
+    this.passenger_marker = new google.maps.Marker({
       map: this.map,
       animation: google.maps.Animation.DROP,
-      position: latLng
+      position: latLng,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 6,
+        fillColor: 'teal',
+        fillOpacity: 1,
+        strokeColor: 'aqua',
+        strokeWeight: 6,
+        strokeOpacity: 0.6
+      },
+
     });
-
+    this.updateMarkers();
     this.trackDriver();
-  }
-
-  // make array with range is n
-  range(n) {
-    return new Array(Math.round(n));
   }
 
   trackDriver() {
     this.showDriverOnMap();
-
     this.driverTracking = setInterval(() => {
-      this.marker.setMap(null);
       this.showDriverOnMap();
     }, POSITION_INTERVAL);
-
-    console.log(POSITION_INTERVAL);
   }
 
   cancelTrip() {
-    this.tripService.cancelTrip(this.trip.$key).then(data => {
-      console.log(data);
-      this.nav.setRoot(HomePage);
+    if (this.websocketSubscription) this.websocketSubscription.unsubscribe();
+    this.api.cancelTrip(this.trip.id).subscribe(data => {
+      if (data && data.result == 'success') {
+        this.nav.setRoot('HomePage');
+      }
     })
   }
 
-  // show user on map
   showDriverOnMap() {
-    // get user's position
-    this.driverService.getDriverPosition(
-      this.placeService.getLocality(),
-      this.driver.type,
-      this.driver.$key
-    ).take(1).subscribe((snapshot: any) => {
-      // create or update
-      let latLng = new google.maps.LatLng(snapshot.lat, snapshot.lng);
-
-      if (this.tripStatus == TRIP_STATUS_GOING) {
-        console.log(this.tripStatus);
-        this.map.setCenter(latLng);
+    this.api.getDriverLocation(this.trip.driver_id).subscribe(data => {
+      if (data && data.result == 'success') {
+        let latLng = new google.maps.LatLng(data.latitude, data.longitude);
+        if (!this.driver_marker) {
+          this.map.setCenter(latLng);
+          this.driver_marker = new google.maps.Marker({
+            map: this.map,
+            position: latLng,
+            icon: {
+              url: 'assets/img/map-suv.png',
+              size: new google.maps.Size(32, 32),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(16, 16),
+              scaledSize: new google.maps.Size(32, 32)
+            }
+          });
+        } else {
+          this.driver_marker.setPosition(latLng);
+          this.map.panTo(latLng);
+        }
       }
+    })
+  }
 
-      // show vehicle to map
-      this.marker = new google.maps.Marker({
+  private updateMarkers() {
+    if (this.trip.origin_latitude && this.trip.origin_longitude) {
+      if (this.origin_marker) this.origin_marker.setMap(null);
+      this.origin_marker = new google.maps.Marker({
         map: this.map,
-        position: latLng,
-        icon: {
-          url: 'assets/img/map-suv.png',
-          size: new google.maps.Size(32, 32),
-          origin: new google.maps.Point(0, 0),
-          anchor: new google.maps.Point(16, 16),
-          scaledSize: new google.maps.Size(32, 32)
-        },
+        animation: google.maps.Animation.DROP,
+        position: new google.maps.LatLng(this.trip.origin_latitude, this.trip.origin_longitude),
+        icon: 'assets/img/pin-green.png'
       });
-    });
+    } else {
+      if (this.origin_marker) this.origin_marker.setMap(null);
+    }
+
+    if (this.trip.destination_latitude && this.trip.destination_longitude) {
+      if (this.destination_marker) this.destination_marker.setMap(null);
+      this.destination_marker = new google.maps.Marker({
+        map: this.map,
+        animation: google.maps.Animation.DROP,
+        position: new google.maps.LatLng(this.trip.destination_latitude, this.trip.destination_longitude),
+        icon: 'assets/img/pin-red.png'
+      });
+    } else {
+      if (this.destination_marker) this.destination_marker.setMap(null);
+    }
   }
 }

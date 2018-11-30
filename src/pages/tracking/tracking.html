@@ -1,11 +1,6 @@
 <ion-header>
   <ion-navbar color="primary">
-    <ion-title>{{'ON_THE_WAY' | translate}}</ion-title>
-    <ion-buttons end>
-      <button ion-button *ngIf="tripStatus == 'finished'"  (click)="showRateCard()">{{'SHOW_RATE_CARD' | translate}}</button>
-      <button ion-button *ngIf="tripStatus == 'waiting'" (click)="cancelTrip()">{{'CANCEL_TRIP' | translate}}</button>
-      <a href="tel:{{sos}}" ion-button *ngIf="tripStatus == 'going'">{{'SOS' | translate}}</a>
-    </ion-buttons>
+    <ion-title>{{trip && trip.status == 'GOING' ? 'A CAMINHO': 'AGUARDE O MOTORISTA'}}</ion-title>
   </ion-navbar>
 </ion-header>
 
@@ -13,15 +8,22 @@
   <div id="map"></div>
 </ion-content>
 <ion-footer>
-    <div style="float:right;background:yellow; color: #222">{{ 'OTP' | translate}}: {{trip.otp}}</div>
-    <ion-item>
-      <ion-avatar item-left>
-          <img src="{{ (driver)?.photoURL }}"/>
-      </ion-avatar>
-      <h2>{{ (driver)?.name }} &nbsp; {{(driver)?.rating}} <ion-icon name="md-star" color="yellow"></ion-icon> </h2>
-      <p>{{ (driver)?.plate }} &middot; {{ (driver)?.brand }}</p>
-      <a item-right ion-button clear href="tel: {{ (driver)?.phoneNumber }} ">
-        <ion-icon name="call"></ion-icon>&nbsp;{{'CALL' | translate}}
+  <ion-item *ngIf="driver">
+    <ion-avatar item-left>
+      <img src="{{ driver.avatar_url || 'assets/img/default-dp.png' }}" />
+    </ion-avatar>
+    <h2>{{ driver.name }} &nbsp; {{ driver.rating}} <ion-icon name="md-star" color="warning"></ion-icon>
+    </h2>
+    <p>{{ driver.car.name }} &middot; Placa {{ driver.car.plate }}</p>
+  </ion-item>
+  <ion-row no-padding justify-content-center>
+    <ion-col col *ngIf="trip && trip.status == 'WAITING'">
+      <button ion-button block color="danger" (tap)="cancelTrip()">CANCELAR</button>
+    </ion-col>
+    <ion-col col>
+      <a item-right ion-button block outline *ngIf="driver" href="tel: {{ driver.phone }} ">
+        CONTATO
       </a>
-    </ion-item>
+    </ion-col>
+  </ion-row>
 </ion-footer>
