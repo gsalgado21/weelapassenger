@@ -33,6 +33,14 @@ page-home {
     padding: 4px;
   }
 
+  .alert.card{
+    position: absolute;
+    bottom: 10px;
+    left: 0px;
+    right: 0px;
+    border: 1px solid map-get($map: $colors, $key: primary)
+  }
+
   .active img{
     background: color($colors, primary);
     color: #fff;

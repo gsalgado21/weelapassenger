@@ -3,6 +3,7 @@ import { NavController, Platform, IonicPage } from 'ionic-angular';
 import { Geolocation } from '@ionic-native/geolocation';
 import { PlaceService } from "../../services/place-service";
 import { Utils } from "../../services/utils";
+import { Diagnostic } from '@ionic-native/diagnostic';
 import { ApiService } from '../../services/api-service';
 
 declare var google: any;
@@ -23,7 +24,7 @@ export class HomePage {
   private directionsService: any;
   private directionsDisplay: any;
 
-  constructor(public nav: NavController, public platform: Platform, public placeService: PlaceService,
+  constructor(public nav: NavController, public platform: Platform, public placeService: PlaceService, private diagnostic: Diagnostic,
     private geolocation: Geolocation, private chRef: ChangeDetectorRef, public utils: Utils, private api: ApiService) {
     this.api.getCategories().subscribe(data => {
       if (data && data.result == 'success') {
@@ -45,7 +46,9 @@ export class HomePage {
         else this.nav.setRoot('TrackingPage');
       }
     });
-    setTimeout(() => { this.loadMap(); }, 800);
+    setTimeout(() => { this.loadMap() }, 600);
+    this.checkGPS();
+    this.platform.resume.subscribe(() => this.checkGPS());
   }
 
   ionViewWillLeave() { }
@@ -63,7 +66,7 @@ export class HomePage {
   }
 
   private loadCurrentPosition(map) {
-    this.geolocation.getCurrentPosition().then((resp) => {
+    this.geolocation.getCurrentPosition({ timeout: 5000, enableHighAccuracy: true, maximumAge: Number.MAX_SAFE_INTEGER }).then((resp) => {
       let lat_lng = new google.maps.LatLng(resp.coords.latitude, resp.coords.longitude);
       let geocoder = new google.maps.Geocoder();
       geocoder.geocode({ 'latLng': lat_lng, 'region': 'BR' }, (results, status) => {
@@ -204,5 +207,17 @@ export class HomePage {
         return false;
       }
     }], true, [{ name: 'coupon', placeholder: 'Informe o código para validação' }])
+  }
+
+  private checkGPS() {
+    if (this.platform.is('cordova')) {
+      this.diagnostic.getLocationMode().then(mode => {
+        if (mode != 'high_accuracy' && mode != 'device_only') {
+          this['gps_alert'] = true;
+        } else {
+          this['gps_alert'] = false;
+        }
+      });
+    }
   }
 }

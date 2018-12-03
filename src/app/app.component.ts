@@ -18,7 +18,7 @@ import { ApiService } from '../services/api-service';
 })
 
 export class MyApp {
-  rootPage: any;
+  rootPage: any = 'SplashPage';
   nav: any;
   menu: any;
   user = {};
@@ -26,24 +26,26 @@ export class MyApp {
   constructor(private platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, api: ApiService, private fcm: FCM,
     public authService: AuthService2, headerColor: HeaderColor, public utils: Utils) {
 
-
-
     platform.ready().then(() => {
       this.initFCM();
-      this.menu.enable(false);
-      statusBar.overlaysWebView(false);
-      statusBar.backgroundColorByHexString("#268790");
-      headerColor.tint('#268790');
-      splashScreen.hide();
       this.authService.getUser().subscribe(data => {
         if (data) {
           this.user = data;
           this.menu.enable(true);
-          this.rootPage = 'HomePage';
+          this.nav.setRoot('HomePage');
         } else {
-          this.rootPage = 'LoginPage'
+          this.menu.enable(false);
+          this.nav.setRoot('LoginPage');
         }
+      }, err => {
+        console.log(err);
+        this.menu.enable(false);
+        this.nav.setRoot('LoginPage');
       });
+      statusBar.overlaysWebView(false);
+      statusBar.backgroundColorByHexString("#268790");
+      headerColor.tint('#268790');
+      splashScreen.hide();
       this.utils.events.subscribe('menu:user', (user) => {
         this.user = user;
       });

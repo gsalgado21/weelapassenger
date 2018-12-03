@@ -16,6 +16,16 @@
     </ion-item>
   </ion-list>
 
+  <ion-card *ngIf="gps_alert && !hasOriginAndDestination()" class="alert">
+    <ion-card-content>
+      Para uma melhor experiência, habilite o GPS do seu smartphone
+    </ion-card-content>
+    <hr>
+    <button ion-button float-right clear small (tap)="this.diagnostic.switchToLocationSettings()">
+      IR PARA CONFIGURAÇÕES
+    </button>
+  </ion-card>
+
   <div class="align-bottom" [hidden]="!hasOriginAndDestination()">
     <div text-center [hidden]="!this.loading">
       <ion-spinner></ion-spinner>
@@ -27,7 +37,9 @@
       <h2 no-margin *ngIf="!trip.discount_amount">{{ trip.total_amount | currency : 'BRL' : 'symbol' :'1.2-2' }}</h2>
 
       <div *ngIf="trip.discount_amount">
-        <h5 no-margin><ion-note><s>{{ trip.total_amount | currency : 'BRL' : 'symbol' :'1.2-2' }}</s></ion-note></h5>
+        <h5 no-margin>
+          <ion-note><s>{{ trip.total_amount | currency : 'BRL' : 'symbol' :'1.2-2' }}</s></ion-note>
+        </h5>
         <h2 no-margin>{{ trip.total_amount - trip.discount_amount | currency : 'BRL' : 'symbol' :'1.2-2' }}</h2>
       </div>
     </div>

@@ -18,16 +18,21 @@ export class RegisterPage {
     this.checkInfo().then(resp => {
       this.utils.showLoading();
       this.authService.create({ user: this.user }).subscribe(data => {
-        if(data && data.result == 'success'){
+        if (data && data.result == 'success') {
           this.api.uploadImageToUsers(this.user.image_path, { attribute: 'avatar' }).subscribe(() => {
             this.utils.hideLoading();
             this.utils.events.publish('menu:user', this.user);
             this.utils.showAlert('Seja Bem-Vindo ao Weela', '', [{ text: 'Vamos lá!', handler: () => { this.nav.setRoot('HomePage') } }], false);
+          }, err => {
+            this.utils.hideLoading();
+            this.utils.showError();
           });
-        }else{
+        } else {
+          this.utils.hideLoading();
           this.utils.showError();
         }
       }, error => {
+        this.utils.hideLoading();
         this.utils.showAlert('Erro', error.message, ['OK'], false);
       });
     }).catch(err => {
