@@ -35,7 +35,7 @@ export class HomePage {
     });
     this.directionsDisplay = new google.maps.DirectionsRenderer({
       suppressMarkers: true,
-      polylineOptions: { strokeColor: "Teal", strokeOpacity: 0.5, strokeWeight: 6 }
+      polylineOptions: { strokeColor: "Tomato", strokeOpacity: 0.9, strokeWeight: 5 }
     });
     this.directionsService = new google.maps.DirectionsService();
   }
