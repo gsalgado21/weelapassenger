@@ -3,6 +3,7 @@ import { ViewController, NavParams, IonicPage } from 'ionic-angular';
 import { Geolocation } from '@ionic-native/geolocation';
 import { PlaceService } from "../../services/place-service";
 import { Utils } from '../../services/utils';
+import { MAP_STYLE } from '../../services/constants';
 declare var google: any;
 
 @IonicPage()
@@ -37,7 +38,8 @@ export class MapPage {
       zoom: 16,
       center: latLng,
       mapTypeId: google.maps.MapTypeId.ROADMAP,
-      disableDefaultUI: true
+      disableDefaultUI: true,
+      styles: MAP_STYLE
     });
 
     this.findPlace(latLng);

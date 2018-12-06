@@ -1,5 +1,5 @@
 <ion-content>
-  <div id="map_home" [ngStyle]="{height: '100%'}"></div>
+  <div id="map_home"></div>
 
   <button ion-button menuToggle large clear color="white">
     <ion-icon name="menu"></ion-icon>
@@ -16,6 +16,7 @@
     </ion-item>
   </ion-list>
 
+  <ion-spinner class="map-loading" [hidden]="!loading_map"></ion-spinner>
   <ion-card *ngIf="gps_alert && !hasOriginAndDestination()" class="alert">
     <ion-card-content>
       Para uma melhor experiência, habilite o GPS do seu smartphone

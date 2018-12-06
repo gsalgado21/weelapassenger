@@ -86,7 +86,7 @@ export class ApiService {
   }
 
   public simulateTrip(trip) {
-    return this.http.get('trips/simulate', { origin_latitude: trip.origin_latitude, origin_longitude: trip.origin_longitude, destination_latitude: trip.destination_latitude, destination_longitude: trip.destination_longitude, category_id: trip.category_id });
+    return this.http.post('trips/simulate', { trip });
   }
 
   public requestTrip(trip) {
@@ -110,7 +110,7 @@ export class ApiService {
   }
 
   public rateTrip(trip_id, rating) {
-    return this.http.post('trips/' + trip_id + '/rate', { rating: rating });
+    return this.http.post('trips/' + trip_id + '/rate', { rating: rating, profile: 'PASSENGER' });
   }
 
   public checkCoupon(coupon) {

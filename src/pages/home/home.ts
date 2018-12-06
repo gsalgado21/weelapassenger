@@ -1,10 +1,11 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component } from '@angular/core';
 import { NavController, Platform, IonicPage } from 'ionic-angular';
 import { Geolocation } from '@ionic-native/geolocation';
 import { PlaceService } from "../../services/place-service";
 import { Utils } from "../../services/utils";
 import { Diagnostic } from '@ionic-native/diagnostic';
 import { ApiService } from '../../services/api-service';
+import { MAP_STYLE } from '../../services/constants';
 
 declare var google: any;
 
@@ -25,7 +26,7 @@ export class HomePage {
   private directionsDisplay: any;
 
   constructor(public nav: NavController, public platform: Platform, public placeService: PlaceService, private diagnostic: Diagnostic,
-    private geolocation: Geolocation, private chRef: ChangeDetectorRef, public utils: Utils, private api: ApiService) {
+    private geolocation: Geolocation, public utils: Utils, private api: ApiService) {
     this.api.getCategories().subscribe(data => {
       if (data && data.result == 'success') {
         this.categories = data.categories;
@@ -46,12 +47,22 @@ export class HomePage {
         else this.nav.setRoot('TrackingPage');
       }
     });
-    setTimeout(() => { this.loadMap() }, 600);
     this.checkGPS();
     this.platform.resume.subscribe(() => this.checkGPS());
-  }
 
-  ionViewWillLeave() { }
+    this['loading_map'] = true;
+    setTimeout(() => {
+      this['loading_map'] = false;
+      this.map = new google.maps.Map(document.getElementById('map_home'), {
+        zoom: 8,
+        center: new google.maps.LatLng(-23.0269805, -45.5521864),
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        disableDefaultUI: true,
+        styles: MAP_STYLE
+      });
+      this.loadCurrentPosition(this.map);
+    }, 1200);
+  }
 
   choosePlace(attr) {
     this.utils.showModal('PlacesPage', { type: attr }).onWillDismiss(data => {
@@ -95,7 +106,13 @@ export class HomePage {
         map: this.map,
         animation: google.maps.Animation.DROP,
         position: new google.maps.LatLng(this.trip.origin_latitude, this.trip.origin_longitude),
-        icon: 'assets/img/pin-green.png'
+        icon: {
+          url: 'assets/img/pin-green.png',
+          size: new google.maps.Size(42, 42),
+          origin: new google.maps.Point(0, 0),
+          anchor: new google.maps.Point(16, 16),
+          scaledSize: new google.maps.Size(42, 42)
+        }
       });
       bounds.extend(new google.maps.LatLng(this.trip.origin_latitude, this.trip.origin_longitude));
     }
@@ -121,23 +138,20 @@ export class HomePage {
     }
   }
 
-  private loadMap() {
-    this.map = new google.maps.Map(document.getElementById('map_home'), {
-      zoom: 8,
-      center: new google.maps.LatLng(-23.0269805, -45.5521864),
-      mapTypeId: google.maps.MapTypeId.ROADMAP,
-      disableDefaultUI: true
-    });
-    this.loadCurrentPosition(this.map);
-  }
-
   private simulate() {
     this['loading'] = true;
     this.api.simulateTrip(this.trip).subscribe(data => {
       if (data && data.result == 'success') {
         this.trip.total_amount = data.trip_total;
+      } else {
+        this.utils.showAlert('Que Pena', 'Ocorreu um erro ao simular esta corrida. Tente Novamente mais tarde.', [{ text: 'Ok', handler: () => { this.nav.setRoot('HomePage') } }], false);
       }
       this['loading'] = false;
+    }, err => {
+      console.error(err);
+      this['loading'] = false;
+
+      this.utils.showAlert('Que Pena', 'Ocorreu um erro ao simular esta corrida. Tente Novamente mais tarde.', [{ text: 'Ok', handler: () => { this.nav.setRoot('HomePage') } }], false);
     })
   }
 
@@ -164,7 +178,7 @@ export class HomePage {
     this.directionsDisplay = null;
     this.directionsDisplay = new google.maps.DirectionsRenderer({
       suppressMarkers: true,
-      polylineOptions: { strokeColor: "Teal", strokeOpacity: 0.5, strokeWeight: 6 }
+      polylineOptions: { strokeColor: "Tomato", strokeOpacity: 0.9, strokeWeight: 5 }
     });
     this.utils.showLoading();
     this.api.requestTrip(this.trip).subscribe(data => {

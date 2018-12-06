@@ -1,19 +1,4 @@
-export let SHOW_VEHICLES_WITHIN = 5; // within 5km
-export let POSITION_INTERVAL = 10000; // 2000ms
-export let VEHICLE_LAST_ACTIVE_LIMIT = 60000; // 60s
-
-export let DEAL_STATUS_PENDING = 'pending';
-export let DEAL_STATUS_ACCEPTED = 'accepted';
-export let TRIP_STATUS_GOING = 'going';
-export let TRIP_STATUS_FINISHED = 'finished';
-export let DEAL_TIMEOUT = 20000; // 20s
-
-export let EMAIL_VERIFICATION_ENABLED = false; // send verification email after user register
-export let ENABLE_SIGNUP = true;
-export let SOS = "+919500707757";
-
-// NOTE: Please update your firebase configurations on src/app/app.module.ts
-
+export let POSITION_INTERVAL = 20000;
 export let GOOGLE_MAP_API_KEY = "AIzaSyAAeH42ZD5xodV_me4mqLr_dXlGIRMGrfM&language=pt-BR&region=BR";
 export let GOOGLE_MAP_BASE_URL = "https://maps.googleapis.com/maps/api/";
-export let DEFAULT_AVATAR = "http://placehold.it/150x150";
+export let MAP_STYLE = [{"stylers":[{"visibility":"simplified"}]},{"featureType":"landscape.man_made","elementType":"geometry","stylers":[{"color":"#dfe7e4"},{"visibility":"simplified"}]},{"featureType":"landscape.natural","elementType":"geometry","stylers":[{"color":"#dfe7e4"},{"visibility":"on"}]},{"featureType":"poi","elementType":"labels.text","stylers":[{"visibility":"off"}]},{"featureType":"poi.business","stylers":[{"visibility":"off"}]},{"featureType":"road","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road.highway","elementType":"geometry","stylers":[{"color":"#268790"},{"lightness":45},{"visibility":"simplified"}]},{"featureType":"transit","stylers":[{"visibility":"off"}]}]

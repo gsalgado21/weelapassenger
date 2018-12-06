@@ -5,14 +5,14 @@
 </ion-header>
 
 <ion-content>
-  <div id="map"></div>
+  <div id="map_tracking" [ngStyle]="{height: '100%'}"></div>
 </ion-content>
 <ion-footer>
   <ion-item *ngIf="driver">
     <ion-avatar item-left>
       <img src="{{ driver.avatar_url || 'assets/img/default-dp.png' }}" />
     </ion-avatar>
-    <h2>{{ driver.name }} &nbsp; {{ driver.rating}} <ion-icon name="md-star" color="warning"></ion-icon>
+    <h2>{{ driver.name }} &nbsp; {{ driver.driver_rating}} <ion-icon name="md-star" color="warning"></ion-icon>
     </h2>
     <p>{{ driver.car.name }} &middot; Placa {{ driver.car.plate }}</p>
   </ion-item>

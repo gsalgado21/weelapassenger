@@ -1,5 +1,36 @@
 page-home {
   
+  #map_home{
+    position: relative;
+    min-height: 100%;
+  }
+
+  .map-loading{
+    position: absolute;
+    top: 50%;
+    margin-top: -30px;
+    left: 50%;
+    margin-left: -30px;
+    z-index: 999;
+    min-height: 60px;
+    &::after{
+      content: 'Carregando Mapa...';
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-left: -43px;
+      right: 0;
+      color: map-get($map: $colors, $key:primary);
+      width: 150px;
+    }
+    * {
+      width: 60px;
+      height: 60px;
+      stroke: map-get($map: $colors, $key: primary);
+      fill: #f4f4f4;
+    }
+  }
+
   .button-menutoggle{
     position: absolute;
     top: 0px;
@@ -75,10 +106,6 @@ page-home {
       stroke: map-get($map: $colors, $key: primary);
       fill: #f4f4f4;
     }
-  }
-
-  #map {
-    width: 100vw;
   }
 }
 

@@ -62,7 +62,6 @@ export class AuthService2 {
     params['platform'] = this.device.platform;
     params['version'] = this.device.version;
     params['device_token'] = localStorage.getItem('device_token');
-    params['profile'] = 'PASSENGER';
     return params;
   }
 
@@ -95,8 +94,8 @@ export class AuthService2 {
           observer.complete();
         }
       }, err => {
-          observer.next(null);
-          observer.complete();
+        observer.next(null);
+        observer.complete();
       });
     });
   }

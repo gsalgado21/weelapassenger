@@ -45,4 +45,20 @@ page-tracking,
   .row{
     background-color: #fff;
   }
+
+
+  .gm-style-iw{
+    top: 10px!important;
+    left: 3px!important;
+    right: 3px!important;
+    width: auto!important;
+    color: map-get($map: $colors, $key: primary);
+    font-weight: 800!important;
+    background: #fff;
+    font-size: 16px!important;
+    text-align: center;
+    z-index: 999;
+    margin-bottom: -20px!important;
+
+  }
 }
