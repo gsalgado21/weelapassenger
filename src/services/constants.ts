@@ -1,4 +1,4 @@
 export let POSITION_INTERVAL = 20000;
-export let GOOGLE_MAP_API_KEY = "AIzaSyAAeH42ZD5xodV_me4mqLr_dXlGIRMGrfM&language=pt-BR&region=BR";
+export let GOOGLE_MAP_API_KEY = "AIzaSyA2CrO0y02jBTlUDUNr9MF2z9yQN8zsypM&language=pt-BR&region=BR";
 export let GOOGLE_MAP_BASE_URL = "https://maps.googleapis.com/maps/api/";
 export let MAP_STYLE = [{"stylers":[{"visibility":"simplified"}]},{"featureType":"landscape.man_made","elementType":"geometry","stylers":[{"color":"#dfe7e4"},{"visibility":"simplified"}]},{"featureType":"landscape.natural","elementType":"geometry","stylers":[{"color":"#dfe7e4"},{"visibility":"on"}]},{"featureType":"poi","elementType":"labels.text","stylers":[{"visibility":"off"}]},{"featureType":"poi.business","stylers":[{"visibility":"off"}]},{"featureType":"road","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"road.highway","elementType":"geometry","stylers":[{"color":"#268790"},{"lightness":45},{"visibility":"simplified"}]},{"featureType":"transit","stylers":[{"visibility":"off"}]}]

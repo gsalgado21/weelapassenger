@@ -15,6 +15,7 @@ export class PlacesPage {
   lat: number;
   lon: number;
   pageLoaded = false;
+  type: any;
   @ViewChild(Searchbar) searchbar: Searchbar;
 
   constructor(public view: ViewController, public placeService: PlaceService, public geolocation: Geolocation, private utils: Utils,
@@ -29,6 +30,7 @@ export class PlacesPage {
 
   ionViewDidLoad() {
     this.searchbar.initFocus();
+    this.type = this.navParams.get('type');
   }
 
   ionViewDidEnter() {
@@ -44,7 +46,7 @@ export class PlacesPage {
 
   selectPlace(place) {
     console.log(place);
-    let attr = this.navParams.get('type');
+    let attr = this.type;
     let obj = {};
     obj[attr + '_latitude'] = place.geometry.location.lat;
     obj[attr + '_longitude'] = place.geometry.location.lng;
@@ -91,7 +93,7 @@ export class PlacesPage {
   }
 
   openMap() {
-    this.utils.showModal('MapPage', { type: this.navParams.get('type') }).onWillDismiss(data => {
+    this.utils.showModal('MapPage', { type: this.type }).onWillDismiss(data => {
       if (data) this.view.dismiss(data);
     });
   }

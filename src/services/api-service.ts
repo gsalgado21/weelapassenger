@@ -74,7 +74,7 @@ export class ApiService {
   }
 
   public getTripInProgress() {
-    return this.http.get('trips/in_progress', null);
+    return this.http.get('trips/in_progress', { profile: 'PASSENGER' });
   }
 
   public getCategories() {
@@ -115,5 +115,37 @@ export class ApiService {
 
   public checkCoupon(coupon) {
     return this.http.get('coupons/check', { coupon });
+  }
+
+  public getNotifications() {
+    return this.http.get('notifications', null);
+  }
+
+  public readNotifications(id) {
+    return this.http.get('notifications/' + id, null);
+  }
+
+  public uploadImageToIssue(file_path, params) {
+    return this.http.uploadImage('issues/image_upload', file_path, params);
+  }
+
+  public createIssue(params) {
+    return this.http.post('issues', params);
+  }
+
+  public getMessages(trip_id) {
+    return this.http.get('messages', { trip_id });
+  }
+
+  public getMessage(message_id) {
+    return this.http.get('messages/' + message_id, null);
+  }
+
+  public createMessage(params) {
+    return this.http.post('messages', params);
+  }
+  
+  public readMessage(messages_ids) {
+    return this.http.post('messages/read', { messages_ids });
   }
 }

@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>Fale Conosco</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  <form (ngSubmit)="confirm()" #contactForm="ngForm">
+    <ion-card>
+      <ion-list class="list-form">
+        <ion-item>
+          <ion-label stacked>Assunto <i class="req"></i></ion-label>
+          <ion-input type="text" name="subject" [(ngModel)]="issue.subject" required></ion-input>
+        </ion-item>
+        <ion-item>
+          <ion-label stacked>Mensagem <i class="req"></i></ion-label>
+          <ion-textarea type="text" name="content" [(ngModel)]="issue.content" required></ion-textarea>
+        </ion-item>
+        <ion-item (tap)="selectImage()">
+          <p>
+            <ion-note>Imagem (opcional)</ion-note>
+          </p>
+          <h2 [hidden]="issue.image">
+            <ion-icon name="md-images"></ion-icon> Selecionar Imagem
+          </h2>
+          <ion-thumbnail [hidden]="!issue.image"><img [src]="issue.image" *ngIf="issue.image"></ion-thumbnail>
+        </ion-item>
+      </ion-list>
+    </ion-card>
+    <ion-row justify-content-end margin-top>
+      <ion-col col-6>
+        <button ion-button block icon-end round [disabled]="!contactForm.form.valid" type="submit">
+          CONFIRMAR
+        </button>
+      </ion-col>
+    </ion-row>
+  </form>
+</ion-content>

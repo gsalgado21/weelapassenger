@@ -14,7 +14,7 @@
     </ion-avatar>
     <h2>{{ driver.name }} &nbsp; {{ driver.driver_rating}} <ion-icon name="md-star" color="warning"></ion-icon>
     </h2>
-    <p>{{ driver.car.name }} &middot; Placa {{ driver.car.plate }}</p>
+    <p>{{ driver.car.name }} &middot;</p><p>Placa {{ driver.car.plate }}</p>
   </ion-item>
   <ion-row no-padding justify-content-center>
     <ion-col col *ngIf="trip && trip.status == 'WAITING'">
@@ -23,6 +23,9 @@
     <ion-col col>
       <a item-right ion-button block outline *ngIf="driver" href="tel: {{ driver.phone }} ">
         CONTATO
+      </a>
+      <a item-right ion-button block outline (tap)="openChat()">
+        CHAT
       </a>
     </ion-col>
   </ion-row>

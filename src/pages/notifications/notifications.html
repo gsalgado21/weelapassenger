@@ -1,0 +1,23 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>NOTIFICAÇÕES</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <button ion-item *ngFor="let n of notifications" (tap)="show(n)">
+      <p class="date-label {{n.readed_at ? '': 'not-readed'}}" item-start text-center>
+        {{ n.created_at | date: 'dd' }}
+        <br> {{ n.created_at | date: 'MMM' }}
+      </p>
+      <h2>{{ n.title }}</h2>
+      <ion-note>{{n.content}}</ion-note>
+    </button>
+    <ion-item *ngIf="notifications && notifications.length == 0">
+      <ion-note>
+        Nenhuma notificação pendente
+      </ion-note>
+    </ion-item>
+  </ion-list>
+</ion-content>

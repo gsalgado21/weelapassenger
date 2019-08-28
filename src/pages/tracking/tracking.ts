@@ -99,6 +99,30 @@ export class TrackingPage implements OnInit {
   }
 
   cancelTrip() {
+    this.utils.showAlert('Cancelar Corrida', 'Tem certeza que deseja cancelar a corrida?', [{ text: 'Não', role: 'cancel' },
+    {
+      text: 'Sim', handler: () => {
+        this.utils.showLoading();
+        if (this.websocketSubscription) this.websocketSubscription.unsubscribe();
+        this.api.cancelTrip(this.trip.id).subscribe(data => {
+          if (data && data.result == 'success') {
+            this.nav.setRoot('HomePage');
+          } else {
+            this.utils.showError();
+          }
+          this.utils.hideLoading();
+        }, err => {
+          this.utils.hideLoading();
+          this.utils.showError();
+        })
+      }
+    }
+    ], false);
+
+  }
+
+
+  cancelTrip2() {
     if (this.websocketSubscription) this.websocketSubscription.unsubscribe();
     this.api.cancelTrip(this.trip.id).subscribe(data => {
       if (data && data.result == 'success') {
@@ -172,6 +196,12 @@ export class TrackingPage implements OnInit {
     } else {
       if (this.destination_marker) this.destination_marker.setMap(null);
     }
+  }
+
+  openChat() {
+    this.utils.showModal('ChatPage', { trip_id: this.trip.id }).onWillDismiss(() => {
+      this['has_message'] = false;
+    })
   }
 
   // retorna distancia em minutos carro à 40km/h

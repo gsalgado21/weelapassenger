@@ -1,0 +1,44 @@
+<ion-header>
+  <ion-navbar color="primary">
+    <ion-title>Conversa</ion-title>
+    <ion-buttons end>
+      <button ion-button (tap)="view.dismiss()">
+        <ion-icon name="close"></ion-icon>
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+<ion-content padding>
+  <ion-row *ngFor="let data of messages">
+    <ion-col col-9 *ngIf="data.sender_id != current_user" class="message other_message">
+      <span>{{ data.content }}</span>
+    </ion-col>
+    <ion-col offset-3 col-9 *ngIf="data.sender_id == current_user" class="message my_message">
+      <span>{{ data.content }}</span>
+    </ion-col>
+    <ion-col col-12>
+      <div [class]="data.sender_id == current_user ? 'time right' : 'time left'">
+        {{data.created_at | date: 'dd MMM yyyy HH:mm'}}
+        <ion-icon [hidden]="data.receiver_id == current_user" [name]="data.readed ? 'done-all':'checkmark'"
+          [color]="data.readed ? 'primary':'dark'"></ion-icon>
+      </div>
+    </ion-col>
+  </ion-row>
+  <ion-row>
+    <ion-col col>
+      <div text-center padding-vertical *ngIf="messages" [hidden]="messages.length > 0">
+        <ion-note>Nenhuma Mensagem</ion-note>
+      </div>
+    </ion-col>
+  </ion-row>
+</ion-content>
+<ion-footer>
+  <form (ngSubmit)="sendMessage()" #msgForm="ngForm">
+    <ion-item no-lines>
+      <ion-input type="text" name="message" placeholder="Digite sua mensagem" [(ngModel)]="message"></ion-input>
+      <button ion-button item-end type="submit" icon-only clear color="primary" [disabled]="!message || message === ''">
+        <ion-icon name="send"></ion-icon>
+      </button>
+    </ion-item>
+  </form>
+</ion-footer>

@@ -1,0 +1,10 @@
+page-notifications {
+    .date-label.not-readed::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        height: 100%;
+        border-left: 6px solid rgb(255, 164, 44);
+        margin-top: -14px;
+    }
+}
