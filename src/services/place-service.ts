@@ -67,10 +67,10 @@ export class PlaceService {
 
     return {
       location: {
-        lat: address.geometry.location.lat(),
-        lng: address.geometry.location.lng()
+        lat: address.Location.DisplayPosition.Latitude,
+        lng: address.Location.DisplayPosition.Longitude
       },
-      vicinity: address.formatted_address
+      vicinity: address.Location.Address.Label
     }
   }
 

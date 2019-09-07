@@ -12,7 +12,7 @@
 <ion-content>
   <div padding class="address-description" [hidden]="!address">
     <p>Endereço</p>
-    <h2>{{ address ? address.formatted_address : '' }}</h2>
+    <h2>{{ address ? address.Location.Address.Label : '' }}</h2>
     <button ion-button block (tap)="selectPlace()">
       CONFIRMAR
     </button>

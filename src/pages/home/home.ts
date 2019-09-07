@@ -5,10 +5,10 @@ import { PlaceService } from "../../services/place-service";
 import { Utils } from "../../services/utils";
 import { Diagnostic } from '@ionic-native/diagnostic';
 import { ApiService } from '../../services/api-service';
-import { MAP_STYLE } from '../../services/constants';
+import { HERE_MAP_API_KEY} from '../../services/constants'
 
-declare var google: any;
-
+declare var H: any;
+var currentVersion = 2.0;
 
 @IonicPage()
 @Component({
@@ -20,10 +20,10 @@ export class HomePage {
   categories: Array<any>;
   trip: any = { payment_method: 'CASH' };
   map: any;
+  here_api: any;
+  routeLine: any;
   origin_marker: any;
   destination_marker: any;
-  private directionsService: any;
-  private directionsDisplay: any;
 
   constructor(public nav: NavController, public platform: Platform, public placeService: PlaceService, private diagnostic: Diagnostic,
     private geolocation: Geolocation, public utils: Utils, private api: ApiService) {
@@ -33,14 +33,17 @@ export class HomePage {
         if (data.categories.length == 1) this.trip.category_id = data.categories[0]['id'];
       }
     });
-    this.directionsDisplay = new google.maps.DirectionsRenderer({
-      suppressMarkers: true,
-      polylineOptions: { strokeColor: "Tomato", strokeOpacity: 0.9, strokeWeight: 5 }
-    });
-    this.directionsService = new google.maps.DirectionsService();
   }
 
   ionViewDidLoad() {
+    this.api.getAppVersion().subscribe(data =>{
+      if(data.version > currentVersion) {
+        let buttons: Array<any> = [];
+        buttons.push({ text: data.button, handler: () => { window.open(data.link, '_system', 'location=yes') } })
+        this.utils.showAlert(data.title, data.message, buttons, false);
+      }
+    });
+
     this.api.getTripInProgress().subscribe(data => {
       if (data && data.result == 'success') {
         if (data.trip.status == 'DONE') this.nav.setRoot('SummaryPage');
@@ -51,15 +54,28 @@ export class HomePage {
     this.platform.resume.subscribe(() => this.checkGPS());
 
     this['loading_map'] = true;
+
     setTimeout(() => {
       this['loading_map'] = false;
-      this.map = new google.maps.Map(document.getElementById('map_home'), {
-        zoom: 8,
-        center: new google.maps.LatLng(-23.0269805, -45.5521864),
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
-        disableDefaultUI: true,
-        styles: MAP_STYLE
+
+      this.here_api = new H.service.Platform({
+        'apikey': HERE_MAP_API_KEY
       });
+
+      let maptypes = this.here_api.createDefaultLayers();
+
+      this.map = new H.Map(
+        document.getElementById('map_home'),
+        maptypes.vector.normal.map,
+        {
+          zoom: 8,
+          center: { lng: -45.5521864, lat: -23.0269805 }
+        });
+
+      new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
+
+      window.addEventListener('resize', () => this.map.getViewPort().resize());
+      
       this.loadCurrentPosition(this.map);
     }, 1200);
   }
@@ -78,19 +94,32 @@ export class HomePage {
 
   private loadCurrentPosition(map) {
     this.geolocation.getCurrentPosition({ timeout: 5000, enableHighAccuracy: true, maximumAge: Number.MAX_SAFE_INTEGER }).then((resp) => {
-      let lat_lng = new google.maps.LatLng(resp.coords.latitude, resp.coords.longitude);
-      let geocoder = new google.maps.Geocoder();
-      geocoder.geocode({ 'latLng': lat_lng, 'region': 'BR' }, (results, status) => {
-        if (status == google.maps.GeocoderStatus.OK) {
-          let location: any = results[0];
-          this.trip.origin_vicinity = location.formatted_address;
-          this.trip.origin_latitude = location.geometry.location.lat();
-          this.trip.origin_longitude = location.geometry.location.lng();
-          map.setCenter(lat_lng);
-          map.setZoom(15);
-          this.updateMarkers();
-        }
-      });
+      let lat_lng = new H.geo.Point(resp.coords.latitude, resp.coords.longitude);
+
+      let _self = this;
+      let reverseGeocodingParameters = {
+        prox: lat_lng.lat + ',' + lat_lng.lng + ',10',
+        mode: 'retrieveAddresses',
+        maxresults: 1
+      };
+
+      function onSuccess(result) {
+        let location = result.Response.View[0].Result[0];
+
+        _self.trip.origin_vicinity = location.Location.Address.Label;
+        _self.trip.origin_latitude = location.Location.DisplayPosition.Latitude;
+        _self.trip.origin_longitude = location.Location.DisplayPosition.Longitude;
+        map.setCenter(lat_lng);
+        map.setZoom(15);
+        _self.updateMarkers();
+      }
+
+      let geocoder = this.here_api.getGeocodingService();
+
+      geocoder.reverseGeocode(
+        reverseGeocodingParameters,
+        onSuccess,
+        function (e) { alert(e); });
     });
   }
 
@@ -99,35 +128,26 @@ export class HomePage {
   }
 
   private updateMarkers() {
-    var bounds = new google.maps.LatLngBounds();
     if (this.trip.origin_latitude && this.trip.origin_longitude) {
-      if (this.origin_marker) this.origin_marker.setMap(null);
-      this.origin_marker = new google.maps.Marker({
-        map: this.map,
-        animation: google.maps.Animation.DROP,
-        position: new google.maps.LatLng(this.trip.origin_latitude, this.trip.origin_longitude),
-        icon: {
-          url: 'assets/img/pin-green.png',
-          size: new google.maps.Size(42, 42),
-          origin: new google.maps.Point(0, 0),
-          anchor: new google.maps.Point(16, 16),
-          scaledSize: new google.maps.Size(42, 42)
-        }
-      });
-      bounds.extend(new google.maps.LatLng(this.trip.origin_latitude, this.trip.origin_longitude));
+      let green_icon = new H.map.Icon('assets/img/pin-green.png');
+
+      if (this.origin_marker)
+        this.map.removeObject(this.origin_marker);
+
+      this.origin_marker = new H.map.Marker(new H.geo.Point(this.trip.origin_latitude, this.trip.origin_longitude), { icon: green_icon });
+      this.map.addObject(this.origin_marker);
     }
 
     if (this.trip.destination_latitude && this.trip.destination_longitude) {
-      if (this.destination_marker) this.destination_marker.setMap(null);
-      this.destination_marker = new google.maps.Marker({
-        map: this.map,
-        animation: google.maps.Animation.DROP,
-        position: new google.maps.LatLng(this.trip.destination_latitude, this.trip.destination_longitude),
-        icon: 'assets/img/pin-red.png'
-      });
-      bounds.extend(new google.maps.LatLng(this.trip.destination_latitude, this.trip.destination_longitude));
+      let red_icon = new H.map.Icon('assets/img/pin-red.png');
+
+      if (this.destination_marker)
+        this.map.removeObject(this.destination_marker);
+
+      this.destination_marker = new H.map.Marker(new H.geo.Point(this.trip.destination_latitude, this.trip.destination_longitude), { icon: red_icon });
+      this.map.addObject(this.destination_marker);
     }
-    this.map.fitBounds(bounds);
+
     if (this.hasOriginAndDestination()) {
       this.showDirections();
       this.simulate();
@@ -156,30 +176,50 @@ export class HomePage {
   }
 
   private showDirections() {
-    console.log(this.directionsDisplay);
-    this.directionsDisplay.setMap(this.map);
     let _self = this;
-    this.directionsService.route({
-      origin: new google.maps.LatLng(this.trip.origin_latitude, this.trip.origin_longitude),
-      destination: new google.maps.LatLng(this.trip.destination_latitude, this.trip.destination_longitude),
-      travelMode: google.maps.TravelMode.DRIVING
-    }, function (response, status) {
-      console.log(response);
-      if (status == google.maps.DirectionsStatus.OK) {
-        _self.directionsDisplay.setDirections(response);
-      } else {
-        console.log("error");
+    let routingParameters = {
+      'mode': 'fastest;car',
+      'waypoint0': 'geo!' + this.trip.origin_latitude + ',' + this.trip.origin_longitude,
+      'waypoint1': 'geo!' + this.trip.destination_latitude + ',' + this.trip.destination_longitude,
+      'representation': 'display'
+    };
+
+    let onResult = function (result) {
+      let route, routeShape, linestring;
+
+      if (result.response.route) {
+        route = result.response.route[0];
+        routeShape = route.shape;
+
+        linestring = new H.geo.LineString();
+
+        routeShape.forEach(function (point) {
+          let parts = point.split(',');
+          linestring.pushLatLngAlt(parts[0], parts[1]);
+        });
+
+        if (_self.routeLine)
+          _self.map.removeObject(_self.routeLine);
+
+        _self.routeLine = new H.map.Polyline(linestring, {
+          style: { strokeColor: 'Tomato', lineWidth: 5 }
+        });
+
+        _self.map.addObject(_self.routeLine);
+
+        _self.map.getViewModel().setLookAtData({ bounds: _self.routeLine.getBoundingBox() });
       }
-    });
+    };
+
+    let router = this.here_api.getRoutingService();
+
+    router.calculateRoute(routingParameters, onResult,
+      function (error) {
+        alert(error.message);
+      });
   }
 
   requestCar() {
-    this.directionsDisplay.setMap(null);
-    this.directionsDisplay = null;
-    this.directionsDisplay = new google.maps.DirectionsRenderer({
-      suppressMarkers: true,
-      polylineOptions: { strokeColor: "Tomato", strokeOpacity: 0.9, strokeWeight: 5 }
-    });
     this.utils.showLoading();
     this.api.requestTrip(this.trip).subscribe(data => {
       if (data && data.result == 'success') {

@@ -148,4 +148,8 @@ export class ApiService {
   public readMessage(messages_ids) {
     return this.http.post('messages/read', { messages_ids });
   }
+
+  public getAppVersion() {
+    return this.http.get('versions/passanger', null);
+  }
 }

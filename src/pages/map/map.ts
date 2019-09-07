@@ -3,8 +3,9 @@ import { ViewController, NavParams, IonicPage } from 'ionic-angular';
 import { Geolocation } from '@ionic-native/geolocation';
 import { PlaceService } from "../../services/place-service";
 import { Utils } from '../../services/utils';
-import { MAP_STYLE } from '../../services/constants';
-declare var google: any;
+import { HERE_MAP_API_KEY } from '../../services/constants'
+
+declare var H: any;
 
 @IonicPage()
 @Component({
@@ -13,6 +14,7 @@ declare var google: any;
 })
 export class MapPage {
   map: any;
+  here_api: any;
   address: any;
   marker: any;
 
@@ -33,38 +35,62 @@ export class MapPage {
   }
 
   loadMap(lat, lng) {
-    let latLng = new google.maps.LatLng(lat, lng);
-    this.map = new google.maps.Map(document.getElementById('map'), {
-      zoom: 16,
-      center: latLng,
-      mapTypeId: google.maps.MapTypeId.ROADMAP,
-      disableDefaultUI: true,
-      styles: MAP_STYLE
+    let latLng = new H.geo.Point(lat, lng);
+
+    this.here_api = new H.service.Platform({
+      'apikey': HERE_MAP_API_KEY
     });
+
+    let maptypes = this.here_api.createDefaultLayers();
+
+    this.map = new H.Map(
+      document.getElementById('map'),
+      maptypes.vector.normal.map,
+      {
+        zoom: 16,
+        center: latLng
+      });
+
+    new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
+
+    window.addEventListener('resize', () => this.map.getViewPort().resize());
 
     this.findPlace(latLng);
 
-    this.map.addListener('dragend', (event) => {
+    this.map.addEventListener('dragend', (event) => {
       this.utils.showLoading();
       setTimeout(() => {
         let center = this.map.getCenter();
         this.findPlace(center);
       }, 400);
     })
-    this.map.addListener('dragstart', (event) => {
+    this.map.addEventListener('dragstart', (event) => {
       this.address = null;
     });
   }
 
   findPlace(latLng) {
-    let geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ 'latLng': latLng }, (results, status) => {
-      if (status == google.maps.GeocoderStatus.OK) {
-        this.address = results[0];
-        this.chRef.detectChanges();
-        this.utils.hideLoading();
-      }
-    });
+    let _self = this;
+    let reverseGeocodingParameters = {
+      prox: latLng.lat + ',' + latLng.lng + ',10',
+      mode: 'retrieveAddresses',
+      maxresults: 1
+    };
+
+    function onSuccess(result) {
+      let location = result.Response.View[0].Result[0];
+
+      _self.address = location;
+      _self.chRef.detectChanges();
+      _self.utils.hideLoading();
+    }
+
+    let geocoder = this.here_api.getGeocodingService();
+
+    geocoder.reverseGeocode(
+      reverseGeocodingParameters,
+      onSuccess,
+      function (e) { alert(e); });
   }
 
   selectPlace() {

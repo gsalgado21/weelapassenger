@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { NavController, Platform, ModalController, AlertController, IonicPage } from 'ionic-angular';
-import { POSITION_INTERVAL, MAP_STYLE } from "../../services/constants";
+import { POSITION_INTERVAL, HERE_MAP_API_KEY } from "../../services/constants";
 import { PlaceService } from "../../services/place-service";
 import { ApiService } from '../../services/api-service';
 import { ServerSocket } from '../../services/server-socket';
 import { Utils } from '../../services/utils';
 import { DriverService } from '../../services/driver-service';
 
-declare var google: any;
+declare var H: any;
 
 @IonicPage()
 @Component({
@@ -17,10 +17,12 @@ declare var google: any;
 export class TrackingPage implements OnInit {
   driver: any;
   map: any;
+  here_api: any;
   trip: any = {};
   driverTracking: any;
   tripStatus: any;
   alertCnt: any = 0;
+  time: any;
 
   driver_marker: any;
   origin_marker: any;
@@ -35,16 +37,26 @@ export class TrackingPage implements OnInit {
     private driverService: DriverService) {
   }
 
-
   ngOnInit() {
     let divMap = (<HTMLInputElement>document.getElementById('map_tracking'));
-    this.map = new google.maps.Map(divMap, {
-      zoom: 18,
-      center: new google.maps.LatLng(-23.0269805, -45.5521864),
-      mapTypeId: google.maps.MapTypeId.ROADMAP,
-      disableDefaultUI: true,
-      styles: MAP_STYLE
+
+    this.here_api = new H.service.Platform({
+      'apikey': HERE_MAP_API_KEY
     });
+
+    let maptypes = this.here_api.createDefaultLayers();
+
+    this.map = new H.Map(
+      divMap,
+      maptypes.vector.normal.map,
+      {
+        zoom: 16,
+        center: new H.geo.Point(-23.0269805, -45.5521864)
+      });
+
+    new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
+
+    window.addEventListener('resize', () => this.map.getViewPort().resize());
   }
 
   ionViewDidLoad() {
@@ -121,7 +133,6 @@ export class TrackingPage implements OnInit {
 
   }
 
-
   cancelTrip2() {
     if (this.websocketSubscription) this.websocketSubscription.unsubscribe();
     this.api.cancelTrip(this.trip.id).subscribe(data => {
@@ -134,67 +145,50 @@ export class TrackingPage implements OnInit {
   showDriverOnMap() {
     this.api.getDriverLocation(this.trip.driver_id).subscribe(data => {
       if (data && data.result == 'success') {
-        let latLng = new google.maps.LatLng(data.latitude, data.longitude);
-        if (!this.last_lat_lng) this.last_lat_lng = latLng;
+        let latLng = new H.geo.Point(data.latitude, data.longitude);
 
-        if (!this.driver_marker) {
-          this.map.setCenter(latLng);
-          this.driver_marker = new google.maps.Marker({
-            map: this.map,
-            position: latLng,
-            icon: {
-              url: 'assets/img/car_right.png',
-              size: new google.maps.Size(40, 40),
-              origin: new google.maps.Point(0, 0),
-              anchor: new google.maps.Point(20, 20),
-              scaledSize: new google.maps.Size(40, 40)
-            }
-          });
-           this.infowindow = new google.maps.InfoWindow({
-            content: this.calcCrow(data.latitude,data.longitude, this.trip.origin_latitude, this.trip.origin_longitude) + ' MIN',
-          });
-        } else {
-          this.driver_marker.setPosition(latLng);
-          let angle = this.driverService.getIconWithAngle(this.last_lat_lng.lat(), this.last_lat_lng.lng(), latLng.lat(), latLng.lng());
-          this.driver_marker.setIcon({
-            url: 'assets/img/car' + angle + '.png',
-            size: new google.maps.Size(40, 40),
-            origin: new google.maps.Point(0, 0),
-            anchor: new google.maps.Point(20, 20),
-            scaledSize: new google.maps.Size(40, 40)
-          });
-          this.infowindow.setContent(this.calcCrow(data.latitude,data.longitude, this.trip.origin_latitude, this.trip.origin_longitude) + ' MIN');
-          this.map.panTo(latLng);
-          this.last_lat_lng = latLng;
+        this.last_lat_lng = latLng;
+        this.map.setCenter(latLng);
+
+        if (this.driver_marker){
+          this.map.removeObject(this.driver_marker);
         }
-        this.infowindow.open(this.map,this.driver_marker);
+
+        let angle = this.driverService.getIconWithAngle(this.last_lat_lng.lat, this.last_lat_lng.lng, latLng.lat, latLng.lng);
+        let car_icon = new H.map.Icon('assets/img/car' + angle + '.png', { size: { w: 40, h: 40 } });
+        this.driver_marker = new H.map.Marker(latLng, { icon: car_icon });
+        this.map.addObject(this.driver_marker);
+        if(this.trip.status == 'GOING')
+          this.time = this.calcCrow(data.latitude, data.longitude, this.trip.destination_latitude, this.trip.destination_longitude) + ' Min';
+        else
+          this.time = this.calcCrow(data.latitude, data.longitude, this.trip.origin_latitude, this.trip.origin_longitude) + ' Min';
       }
     })
   }
 
   private updateMarkers() {
     if (this.trip.origin_latitude && this.trip.origin_longitude) {
-      if (this.origin_marker) this.origin_marker.setMap(null);
-      this.origin_marker = new google.maps.Marker({
-        map: this.map,
-        animation: google.maps.Animation.DROP,
-        position: new google.maps.LatLng(this.trip.origin_latitude, this.trip.origin_longitude),
-        icon: 'assets/img/pin-green.png'
-      });
+      let green_icon = new H.map.Icon('assets/img/pin-green.png');
+
+      if (this.origin_marker)
+        this.map.removeObject(this.origin_marker);
+
+      this.origin_marker = new H.map.Marker(new H.geo.Point(this.trip.origin_latitude, this.trip.origin_longitude), { icon: green_icon });
+      this.map.addObject(this.origin_marker);
     } else {
-      if (this.origin_marker) this.origin_marker.setMap(null);
+      if (this.origin_marker) this.map.removeObject(this.origin_marker);
     }
 
     if (this.trip.destination_latitude && this.trip.destination_longitude) {
-      if (this.destination_marker) this.destination_marker.setMap(null);
-      this.destination_marker = new google.maps.Marker({
-        map: this.map,
-        animation: google.maps.Animation.DROP,
-        position: new google.maps.LatLng(this.trip.destination_latitude, this.trip.destination_longitude),
-        icon: 'assets/img/pin-red.png'
-      });
+      let red_icon = new H.map.Icon('assets/img/pin-red.png');
+
+      if (this.destination_marker)
+        this.map.removeObject(this.destination_marker);
+
+      this.destination_marker = new H.map.Marker(new H.geo.Point(this.trip.destination_latitude, this.trip.destination_longitude), { icon: red_icon });
+      this.map.addObject(this.destination_marker);
     } else {
-      if (this.destination_marker) this.destination_marker.setMap(null);
+      if (this.destination_marker) this.map.removeObject(this.destination_marker);
     }
   }
 

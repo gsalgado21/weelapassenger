@@ -5,7 +5,7 @@
 </ion-header>
 
 <ion-content>
-  <div id="map_tracking" [ngStyle]="{height: '100%'}"></div>
+  <div id="map_tracking"></div>
 </ion-content>
 <ion-footer>
   <ion-item *ngIf="driver">
@@ -14,7 +14,8 @@
     </ion-avatar>
     <h2>{{ driver.name }} &nbsp; {{ driver.driver_rating}} <ion-icon name="md-star" color="warning"></ion-icon>
     </h2>
-    <p>{{ driver.car.name }} &middot;</p><p>Placa {{ driver.car.plate }}</p>
+    <p>{{ driver.car.name }}</p>
+    <p>Placa {{ driver.car.plate }} - <b>Tempo Estimado: {{time}}</b></p>
   </ion-item>
   <ion-row no-padding justify-content-center>
     <ion-col col *ngIf="trip && trip.status == 'WAITING'">
