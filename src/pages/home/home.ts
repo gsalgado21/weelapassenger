@@ -8,7 +8,7 @@ import { ApiService } from '../../services/api-service';
 import { HERE_MAP_API_KEY} from '../../services/constants'
 
 declare var H: any;
-var currentVersion = 2.0;
+var currentVersion = 3.0;
 
 @IonicPage()
 @Component({
@@ -66,9 +66,9 @@ export class HomePage {
 
       this.map = new H.Map(
         document.getElementById('map_home'),
-        maptypes.vector.normal.map,
+        maptypes.raster.normal.map,
         {
-          zoom: 8,
+          zoom: 10,
           center: { lng: -45.5521864, lat: -23.0269805 }
         });
 
@@ -110,7 +110,7 @@ export class HomePage {
         _self.trip.origin_latitude = location.Location.DisplayPosition.Latitude;
         _self.trip.origin_longitude = location.Location.DisplayPosition.Longitude;
         map.setCenter(lat_lng);
-        map.setZoom(15);
+        map.setZoom(16);
         _self.updateMarkers();
       }
 

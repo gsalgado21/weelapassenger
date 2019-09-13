@@ -45,7 +45,7 @@ export class MapPage {
 
     this.map = new H.Map(
       document.getElementById('map'),
-      maptypes.vector.normal.map,
+      maptypes.raster.normal.map,
       {
         zoom: 16,
         center: latLng

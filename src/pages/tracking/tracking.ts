@@ -48,7 +48,7 @@ export class TrackingPage implements OnInit {
 
     this.map = new H.Map(
       divMap,
-      maptypes.vector.normal.map,
+      maptypes.raster.normal.map,
       {
         zoom: 16,
         center: new H.geo.Point(-23.0269805, -45.5521864)
@@ -145,7 +145,11 @@ export class TrackingPage implements OnInit {
   showDriverOnMap() {
     this.api.getDriverLocation(this.trip.driver_id).subscribe(data => {
       if (data && data.result == 'success') {
-        let latLng = new H.geo.Point(data.latitude, data.longitude);
+        let latLng = undefined;
+        if(data.latitude == null || data.longitude == null)
+          latLng = this.last_lat_lng;
+        else
+          latLng = new H.geo.Point(data.latitude, data.longitude);
 
         this.last_lat_lng = latLng;
         this.map.setCenter(latLng);
@@ -159,9 +163,9 @@ export class TrackingPage implements OnInit {
         this.driver_marker = new H.map.Marker(latLng, { icon: car_icon });
         this.map.addObject(this.driver_marker);
         if(this.trip.status == 'GOING')
-          this.time = this.calcCrow(data.latitude, data.longitude, this.trip.destination_latitude, this.trip.destination_longitude) + ' Min';
+          this.time = this.calcCrow(latLng.lat, latLng.lng, this.trip.destination_latitude, this.trip.destination_longitude) + ' Min';
         else
-          this.time = this.calcCrow(data.latitude, data.longitude, this.trip.origin_latitude, this.trip.origin_longitude) + ' Min';
+          this.time = this.calcCrow(latLng.lat, latLng.lng, this.trip.origin_latitude, this.trip.origin_longitude) + ' Min';
       }
     })
   }
