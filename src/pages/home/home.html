@@ -27,49 +27,70 @@
     </button>
   </ion-card>
 
-  <div class="align-bottom" [hidden]="!hasOriginAndDestination()">
+  
+  <div class="align-bottom" text-center [hidden]="!hasOriginAndDestination()">
     <div text-center [hidden]="!this.loading">
       <ion-spinner></ion-spinner>
       <p ion-text color="primary">Simulando Trajeto...</p>
     </div>
+    
+    <div [hidden]="this.loading || confirmed_category">
+      <p ion-text color="primary">Selecione uma categoria.</p>
+      <ion-list>
+        <ion-item *ngFor="let c of categories; index as i" (click)="!c.disabled ? selected_category = i : ''"
+          [ngStyle]="{'margin-top': '1px', 'outline':selected_category === i ? '1px solid #268790' : '', 'opacity':c.disabled ? '0.5' : '1'}">
+          <ion-thumbnail item-start style="padding-left: 5px; padding-top: 5px;">
+            <img src="{{c.image}}">
+          </ion-thumbnail>
+          <h3>{{ c.name }} - {{ c.price | currency : 'BRL' : 'symbol' :'1.2-2' }}</h3>
+          <p style="font-size: 1.1rem;">{{ c.description }}</p>
+          <p [hidden]="!c.disabled" style="color: red; font-size: 1.1rem;">Sem motoristas no momento!</p>
+        </ion-item>
 
-    <div [hidden]="this.loading" text-center>
-      <p no-margin>Valor Estimado</p>
-      <h2 no-margin *ngIf="!trip.discount_amount">{{ trip.total_amount | currency : 'BRL' : 'symbol' :'1.2-2' }}</h2>
+        <button ion-button margin-top (tap)="confirmCategory()">Confirmar</button>
 
-      <div *ngIf="trip.discount_amount">
-        <h5 no-margin>
-          <ion-note><s>{{ trip.total_amount | currency : 'BRL' : 'symbol' :'1.2-2' }}</s></ion-note>
-        </h5>
-        <h2 no-margin>{{ trip.total_amount - trip.discount_amount | currency : 'BRL' : 'symbol' :'1.2-2' }}</h2>
-      </div>
+      </ion-list>
     </div>
+    
+    <div [hidden]="this.loading || !confirmed_category">
+      <div text-center>
+        <p no-margin>Valor Estimado</p>
+        <h2 no-margin *ngIf="!trip.discount_amount">{{ trip.total_amount | currency : 'BRL' : 'symbol' :'1.2-2' }}</h2>
 
-    <ion-row no-margin justify-content-center [hidden]="this.loading">
-      <ion-col col-6 no-padding>
-        <ion-item>
-          <p no-margin>Forma de Pagto</p>
-          <h2 *ngIf="trip.payment_method == 'CASH'" no-margin>
-            <ion-icon name="ios-cash" color="green"></ion-icon> DINHEIRO
-          </h2>
-          <h2 *ngIf="trip.payment_method == 'CREDIT_CARD'" no-margin>
-            <ion-icon name="ios-card" color="warning"></ion-icon> CARTÃO DE CRÉDITO
-          </h2>
-        </ion-item>
-      </ion-col>
-      <ion-col col-6 no-padding>
-        <ion-item (tap)="showPromoPopup()">
-          <p no-margin>Cupom de Desconto</p>
-          <h2 *ngIf="!trip.coupon_token" no-margin>
-            <ion-note>Informar cupom <ion-icon name="ios-arrow-down" small></ion-icon>
-            </ion-note>
-          </h2>
-          <h2 *ngIf="trip.coupon_token" no-margin>
-            <ion-icon name="ios-create"></ion-icon> {{ trip.coupon_token }}
-          </h2>
-        </ion-item>
-      </ion-col>
-    </ion-row>
-    <button ion-button margin-top block [hidden]="this.loading" (tap)="requestCar()">SOLICITAR CARRO</button>
-  </div>
+        <div *ngIf="trip.discount_amount">
+          <h5 no-margin>
+            <ion-note><s>{{ trip.total_amount | currency : 'BRL' : 'symbol' :'1.2-2' }}</s></ion-note>
+          </h5>
+          <h2 no-margin>{{ trip.total_amount - trip.discount_amount | currency : 'BRL' : 'symbol' :'1.2-2' }}</h2>
+        </div>
+      </div>
+
+      <ion-row no-margin justify-content-center>
+        <ion-col col-6 no-padding>
+          <ion-item>
+            <p no-margin>Forma de Pagto</p>
+            <h2 *ngIf="trip.payment_method == 'CASH'" no-margin>
+              <ion-icon name="ios-cash" color="green"></ion-icon> DINHEIRO
+            </h2>
+            <h2 *ngIf="trip.payment_method == 'CREDIT_CARD'" no-margin>
+              <ion-icon name="ios-card" color="warning"></ion-icon> CARTÃO DE CRÉDITO
+            </h2>
+          </ion-item>
+        </ion-col>
+        <ion-col col-6 no-padding>
+          <ion-item (tap)="showPromoPopup()">
+            <p no-margin>Cupom de Desconto</p>
+            <h2 *ngIf="!trip.coupon_token" no-margin>
+              <ion-note>Informar cupom <ion-icon name="ios-arrow-down" small></ion-icon>
+              </ion-note>
+            </h2>
+            <h2 *ngIf="trip.coupon_token" no-margin>
+              <ion-icon name="ios-create"></ion-icon> {{ trip.coupon_token }}
+            </h2>
+          </ion-item>
+        </ion-col>
+      </ion-row>
+      <button ion-button margin-top block (tap)="requestCar()">SOLICITAR CARRO</button>
+    </div>
+  </div> 
 </ion-content>

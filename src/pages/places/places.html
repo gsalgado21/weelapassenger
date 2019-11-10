@@ -1,7 +1,7 @@
 <ion-header>
   <ion-navbar color="primary">
     <ion-searchbar #searchbar [(ngModel)]="keyword" (ionInput)="search($event)" color="dark" (keydown)="loader = true"
-      debounce="600" mode="md" animated="true" [placeholder]="type == 'origin' ? 'Onde você está ?' : 'Para onde você deseja ir ?'" showCancelButton="false" autocorrect="off">
+      debounce="750" mode="md" animated="true" [placeholder]="type == 'origin' ? 'Onde você está ?' : 'Para onde você deseja ir ?'" showCancelButton="false" autocorrect="off">
     </ion-searchbar>
     <ion-buttons end>
       <button ion-button icon-only (tap)="dismiss()">

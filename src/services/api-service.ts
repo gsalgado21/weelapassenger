@@ -78,7 +78,7 @@ export class ApiService {
   }
 
   public getCategories() {
-    return this.http.get('categories', null);
+    return this.http.get('categories/all', null);
   }
 
   public getMyTrips() {

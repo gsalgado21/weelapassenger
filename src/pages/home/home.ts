@@ -5,10 +5,10 @@ import { PlaceService } from "../../services/place-service";
 import { Utils } from "../../services/utils";
 import { Diagnostic } from '@ionic-native/diagnostic';
 import { ApiService } from '../../services/api-service';
-import { HERE_MAP_API_KEY} from '../../services/constants'
+import { HERE_MAP_API_KEY} from '../../services/constants';
 
 declare var H: any;
-var currentVersion = 3.0;
+var currentVersion = 4.0;
 
 @IonicPage()
 @Component({
@@ -24,16 +24,11 @@ export class HomePage {
   routeLine: any;
   origin_marker: any;
   destination_marker: any;
+  selected_category: any = 0;
+  confirmed_category: any;
 
   constructor(public nav: NavController, public platform: Platform, public placeService: PlaceService, private diagnostic: Diagnostic,
-    private geolocation: Geolocation, public utils: Utils, private api: ApiService) {
-    this.api.getCategories().subscribe(data => {
-      if (data && data.result == 'success') {
-        this.categories = data.categories;
-        if (data.categories.length == 1) this.trip.category_id = data.categories[0]['id'];
-      }
-    });
-  }
+    private geolocation: Geolocation, public utils: Utils, private api: ApiService) {}
 
   ionViewDidLoad() {
     this.api.getAppVersion().subscribe(data =>{
@@ -52,7 +47,7 @@ export class HomePage {
     });
     this.checkGPS();
     this.platform.resume.subscribe(() => this.checkGPS());
-
+    
     this['loading_map'] = true;
 
     setTimeout(() => {
@@ -77,7 +72,17 @@ export class HomePage {
       window.addEventListener('resize', () => this.map.getViewPort().resize());
       
       this.loadCurrentPosition(this.map);
-    }, 1200);
+
+      const removeHereLogo = setInterval(() => {
+        const hereLogo = document.getElementsByClassName('H_logo')[0];
+        const hereCopyright = document.getElementsByClassName('H_copyright')[0];
+        if(document.body.contains(hereLogo)) {
+          hereLogo.parentNode.removeChild(hereLogo);
+          hereCopyright.parentNode.removeChild(hereCopyright);
+          clearInterval(removeHereLogo);
+        }
+      }, 500);
+    }, 500);
   }
 
   choosePlace(attr) {
@@ -127,7 +132,18 @@ export class HomePage {
     return this.trip.origin_latitude && this.trip.origin_longitude && this.trip.destination_longitude && this.trip.destination_latitude;
   }
 
-  private updateMarkers() {
+  private async loadCategories() {
+    return new Promise((resolve, reject) => {
+      this.api.getCategories().subscribe(data => {
+        if (data && data.result == 'success') {
+          this.categories = data.categories;
+          resolve(data);
+        }
+      }, error => { reject(error) });
+    });
+  }
+
+  private async updateMarkers() {
     if (this.trip.origin_latitude && this.trip.origin_longitude) {
       let green_icon = new H.map.Icon('assets/img/pin-green.png');
 
@@ -150,29 +166,55 @@ export class HomePage {
 
     if (this.hasOriginAndDestination()) {
       this.showDirections();
-      this.simulate();
       this.map.setZoom(this.map.getZoom() - 6);
+      this['loading'] = true;
+      this.confirmed_category = false;
+      this.selected_category = 0;
+      this.trip.discount_amount = undefined;
+      this.trip.coupon_token = undefined;
+      this.trip.total_amount = undefined;
+
+      try { 
+        await this.loadCategories() 
+      } catch(e) {
+        this.throwSimulationError();
+        return;
+      }
+      
+      const simulations = this.categories.map(async(category, index) => {
+        await this.simulate(category.id, index);
+      });
+
+      try {
+        await Promise.all(simulations);
+        this['loading'] = false;
+      } catch(e) {
+        this.throwSimulationError();
+      }
     } else {
       let zoom = this.map.getZoom();
       if (zoom > 14) this.map.setZoom(15);
     }
   }
 
-  private simulate() {
-    this['loading'] = true;
-    this.api.simulateTrip(this.trip).subscribe(data => {
-      if (data && data.result == 'success') {
-        this.trip.total_amount = data.trip_total;
-      } else {
-        this.utils.showAlert('Que Pena', 'Ocorreu um erro ao simular esta corrida. Tente Novamente mais tarde.', [{ text: 'Ok', handler: () => { this.nav.setRoot('HomePage') } }], false);
-      }
-      this['loading'] = false;
-    }, err => {
-      console.error(err);
-      this['loading'] = false;
+  private async simulate(category_id, index) {
+    return new Promise((resolve, reject) => {
+      this.trip.category_id = category_id
+      this.api.simulateTrip(this.trip).subscribe(data => {
+        if (data && data.result == 'success') {
+          if(typeof data.disabled !== 'undefined')
+            this.categories[index].disabled = data.disabled;
+          this.categories[index].price = data.trip_total;
+          this.trip.category_id = undefined;
+          resolve();
+        } else
+          reject();
+      }, error => reject(error));
+    });
+  }
 
-      this.utils.showAlert('Que Pena', 'Ocorreu um erro ao simular esta corrida. Tente Novamente mais tarde.', [{ text: 'Ok', handler: () => { this.nav.setRoot('HomePage') } }], false);
-    })
+  private throwSimulationError() {
+    this.utils.showAlert('Que Pena', 'Ocorreu um erro ao simular esta corrida. Tente Novamente mais tarde.', [{ text: 'Ok', handler: () => { this.nav.setRoot('HomePage') } }], false);
   }
 
   private showDirections() {
@@ -217,6 +259,12 @@ export class HomePage {
       function (error) {
         alert(error.message);
       });
+  }
+
+  public confirmCategory() {
+    this.trip.category_id = this.categories[this.selected_category].id;
+    this.trip.total_amount = this.categories[this.selected_category].price;
+    this.confirmed_category = true;
   }
 
   requestCar() {
