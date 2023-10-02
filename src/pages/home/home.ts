@@ -8,7 +8,7 @@ import { ApiService } from '../../services/api-service';
 import { HERE_MAP_API_KEY} from '../../services/constants';
 
 declare var H: any;
-var currentVersion = 4.0;
+var currentVersion = 5.0;
 
 @IonicPage()
 @Component({
@@ -269,6 +269,7 @@ export class HomePage {
 
   requestCar() {
     this.utils.showLoading();
+    console.log(this.trip)
     this.api.requestTrip(this.trip).subscribe(data => {
       if (data && data.result == 'success') {
         this.utils.showPopover('HomePopover', null, { trip_id: data.trip_id }).onWillDismiss(trip_status => {

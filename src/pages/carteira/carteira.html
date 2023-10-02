@@ -1,0 +1,196 @@
+<ion-header *ngIf="!addCard">
+  <ion-toolbar color="primary">
+    <ion-buttons start style="position: absolute; left: 10px;">
+      <button ion-button icon-only color="royal" (tap)="close()">
+        <ion-icon name="arrow-back"></ion-icon>
+      </button>
+    </ion-buttons>
+
+    <ion-title style="margin-left: 50px">Carteira</ion-title>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-header *ngIf="addCard">
+  <ion-toolbar color="primary">
+    <ion-buttons start style="position: absolute; left: 10px;">
+      <button ion-button icon-only color="royal" (tap)="addCard = false">
+        <ion-icon name="arrow-back"></ion-icon>
+      </button>
+    </ion-buttons>
+
+    <ion-title style="margin-left: 50px">Cadastrar cartão</ion-title>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content *ngIf="addCard">
+  <!-- BTN -->
+  <div style="margin-top: 80px; padding: 20px">
+    <img *ngIf="flag" class="cardImg" [src]="'assets/imgs/' + flag + '.png'">
+    <img *ngIf="!flag" class="cardImg" [src]="'assets/imgs/' + 'credit-card-flag' + '.png'">
+    <ion-item>
+      <ion-label stacked>Número do cartão<p *ngIf="!cartao_valido && cartao_valido != null" style="color: red;">*numero de cartão inválido</p></ion-label>
+      <ion-input (input)="cardVer()" class="cardInput" [(ngModel)]="card.nmr" type="tel" [brmasker]="{mask:'0000-0000-0000-0000', len:19}" placeholder="0000-0000-0000-0000"></ion-input>
+      
+    </ion-item>
+
+    <ion-item style="margin-top: 20px">
+      <ion-label stacked>Nome do titular</ion-label>
+      <ion-input [(ngModel)]="card.nomt" type="text"></ion-input>
+    </ion-item>
+
+    <ion-row style="padding: 0px; margin-top: 20px">
+      <ion-col col-6 style="padding: 0px">
+        <ion-item>
+          <ion-label stacked>Data de vencimento</ion-label>
+          <ion-input [brmasker]="{mask:'00/00', len:5}" [(ngModel)]="card.vldd" type="tel" placeholder="00/00">
+          </ion-input>
+        </ion-item>
+      </ion-col>
+
+      <ion-col col-6 style="padding-top: 0px; padding-bottom: 0px">
+        <ion-item>
+          <ion-label stacked>Cód. de Segurança</ion-label>
+          <ion-input [brmasker]="{mask:'000', len:3}" [(ngModel)]="card.cdsg" type="tel" placeholder="000"></ion-input>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+  </div>
+
+  <div style="padding: 20px">
+    <div *ngIf="!flag || !card.nmr || !card.vldd || !card.cdsg || !cartao_valido" class="btnInativo" >CONFIRMAR</div>
+    <div *ngIf="flag && card.nmr && card.vldd && card.cdsg && cartao_valido" class="btnAction" (tap)="newCard()">CONFIRMAR</div>
+  </div>
+
+  <div style="padding: 20px; " (tap)="trashCard()" *ngIf='card.id'>
+    <p class="trashCard">Excluir cartão</p>
+  </div>
+</ion-content>
+
+<ion-content *ngIf="!addCard">
+  <div class="divSaldo" *ngIf="!show">
+    <p>Saldo R$ ●●●●●●● <ion-icon (tap)="show = true" class="eyee" name="md-eye-off"></ion-icon>
+    </p>
+
+    <p *ngIf="wallet?.executivo > 0">Saldo executivo R$ ●●●●●●●
+    </p>
+  </div>
+
+  <div class="divSaldo" *ngIf="show">
+    <p>Saldo {{wallet?.valor}} <ion-icon (tap)="show = false" class="eyee" name="md-eye-off"></ion-icon>
+    </p>
+
+    <p *ngIf="wallet?.executivo > 0">Saldo executivo {{wallet?.executivo}}
+    </p>
+  </div>
+
+  <!-- TABS -->
+  <div>
+    <ion-row>
+      <ion-col col-4 class="colTab" [class.colTabActive]="tab == 'recarga'" (tap)="tab = 'recarga'">
+        <p class="titleTab" [class.titleTabActive]="tab == 'recarga'">Recarga</p>
+      </ion-col>
+
+      <ion-col col-4 class="colTab" [class.colTabActive]="tab == 'extrato'" (tap)="tab = 'extrato'">
+        <p class="titleTab" [class.titleTabActive]="tab == 'extrato'">Extrato</p>
+      </ion-col>
+
+      <ion-col col-4 class="colTab" [class.colTabActive]="tab == 'cartoes'" (tap)="tab = 'cartoes'">
+        <p class="titleTab" [class.titleTabActive]="tab == 'cartoes'">Cartões</p>
+      </ion-col>
+    </ion-row>
+  </div>  
+
+
+
+  <!-- EXTRATO -->
+  <div style="margin-top: 40px" *ngIf="tab == 'extrato'">
+    <div class="line" *ngFor="let i of extrato">
+      <ion-row>
+        <div class="blueB"></div>
+        <ion-col col-2>
+          <ion-icon class="lineI" name="ios-card"></ion-icon>
+        </ion-col>
+        <ion-col col-5>
+          <p class="lineT" *ngIf="i.titulo">{{i.titulo}}</p>
+          <p class="lineT" *ngIf="!i.titulo">Lançamentos diversos</p>
+          <ion-icon *ngIf="i.entrada" name="ios-add-circle" class="addIcon"></ion-icon>
+          <ion-icon *ngIf="i.saida" name="ios-remove-circle" class="addIcon" style="color: red;"></ion-icon>
+          <span class="linet2T">R$ {{i.valor}}</span>
+        </ion-col>
+        <ion-col col-5>
+          <button *ngIf="!i.avaliado && i.titulo == 'Passagem Comum'" ion-button color="secondary" (tap)="avaliar(i.id_linha, i.prefixo, i.id)" color="secondary" outline small>Avaliar</button>
+          <p *ngIf="i.avaliado && i.titulo == 'Passagem Comum'">Avaliado</p>
+          <p *ngIf="i.avaliado && i.titulo == 'Passagem Comum'"> 
+            <ion-icon name="md-star" class="addIcon" style="color: #d4a50a;"></ion-icon>
+            <ion-icon *ngIf="i.avaliado && i.titulo == 'Passagem Comum' && i.avaliacao >= 2" name="md-star" class="addIcon" style="color: #d4a50a;"></ion-icon>
+            <ion-icon *ngIf="i.avaliado && i.titulo == 'Passagem Comum' && i.avaliacao >= 3" name="md-star" class="addIcon" style="color: #d4a50a;"></ion-icon>
+            <ion-icon *ngIf="i.avaliado && i.titulo == 'Passagem Comum' && i.avaliacao >= 4" name="md-star" class="addIcon" style="color: #d4a50a;"></ion-icon>
+            <ion-icon *ngIf="i.avaliado && i.titulo == 'Passagem Comum' && i.avaliacao == 5" name="md-star" class="addIcon" style="color: #d4a50a;"></ion-icon>
+          </p>
+          <!--<ion-icon *ngIf="!i.avaliado" name="md-star" class="addIcon" style="color: #d4a50a;" (tap)="avaliar()"></ion-icon>
+           <span class="lineT" *ngIf="!i.avaliado" (tap)="avaliar()">Avaliar</span> -->
+        </ion-col>
+      </ion-row>
+    </div>
+  </div>
+
+  <!-- RECARGA -->
+  <div style="margin-top: 40px" *ngIf="tab == 'recarga'">
+    <p class="escokha">Escolha o valor:</p>
+
+    <div class="cont">
+      <ion-row>
+        <ion-col col-4 *ngFor="let v of valores; let i = index">
+          <div class="contvlr" [class.activee]="v.active" (tap)="activeItem(i)">
+            R$ {{v.value}}
+          </div>
+        </ion-col>
+        <!-- <ion-col col-4>
+          <div class="contvlr" (tap)="outroValor()">
+            Outro valor
+          </div>
+        </ion-col> -->
+      </ion-row>
+      <!-- <ion-row>
+        <ion-col col-12>
+          <div class="contvlr" (tap)="outroValor()">
+            Outro valor
+          </div>
+        </ion-col>
+      </ion-row> -->
+
+      <ion-row>
+        <ion-col col-12>
+          <ion-input class="contvlr2" type="tel" [(ngModel)]="outroValorI" [brmasker]="{money: true}"
+            placeholder="Outro valor: R$ 00,00">
+
+          </ion-input>
+        </ion-col>
+      </ion-row>
+
+      <!-- BTN -->
+      <div>
+        <div class="btnAction" (click)="toRecarga()">CONFIRMAR</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARTÕES -->
+  <div style="margin-top: 40px" *ngIf="tab == 'cartoes'">
+    <p class="addNew" (tap)="addCard = true">Adicionar novo <ion-icon name="ios-add-circle-outline"></ion-icon></p>
+    <p class="escokha">Cartões cadastrados</p>
+    
+    <div style="padding: 15px;">
+      <div *ngFor="let c of cards" style="position: relative;" (tap)="showCardT(c)">
+        <img class="cardImg2" [src]="'assets/imgs/' + c.flag + '.png'">
+        <ion-item style="margin-top: 10px">
+          <ion-label stacked>Número do cartão</ion-label>
+          <ion-input class="cardInput" disabled [(ngModel)]="c.nmr" type="tel"></ion-input>
+        </ion-item>
+      </div>
+
+    </div>
+  </div>
+</ion-content>

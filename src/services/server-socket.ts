@@ -12,7 +12,7 @@ export class ServerSocket {
   constructor() { }
 
   public connect() {
-    let url = 'wss://api.weela.com.br/wsc/' + localStorage.getItem('auth_token');
+    let url = 'ws://dev.weela.com.br/wsc/' + localStorage.getItem('auth_token');
     //let url = 'ws://192.168.15.17:3000/wsc/' + localStorage.getItem('auth_token');
 
     if (this.messages) {
@@ -31,7 +31,7 @@ export class ServerSocket {
 
   public connect2(channel, room?) {
     let input = new QueueingSubject<string>();
-    let url = 'wss://api.weela.com.br/wsc/' + localStorage.getItem('auth_token');
+    let url = 'ws://dev.weela.com.br:8080/wsc/' + localStorage.getItem('auth_token');
     //let url = 'ws://192.168.15.27:3000/wsc/' + localStorage.getItem('auth_token');
     if (this.messages) {
       this.messages = null;

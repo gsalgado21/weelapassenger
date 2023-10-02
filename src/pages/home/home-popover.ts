@@ -21,6 +21,7 @@ export class HomePopover {
     if (!this.websocketSubscription)
       this.websocketSubscription = this.socket.connect().subscribe((data) => {
         let resp = JSON.parse(data);
+        console.log("resposta websocket", resp);
         if (typeof resp.message == 'object' && resp.message.trip_id.toString() == this.trip_id.toString()) {
           this.viewCtrl.dismiss(resp.message.status);
         }

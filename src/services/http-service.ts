@@ -9,14 +9,19 @@ import 'rxjs/add/operator/map';
 export class HttpService {
 
   public api_path: string;
+  public api_vali_path: string;
 
   constructor(private http: Http, private file: File, private transfer: FileTransfer) {
-    this.api_path = 'https://api.weela.com.br/api/v1/';
+    //this.api_path = 'http://34.233.234.26/api/v1/';
+    this.api_vali_path = 'https://api.weela.com.br/';
+    this.api_path = 'https://dev.weela.com.br/api/v1/';
     //this.api_path = 'http://192.168.15.17:3000/api/v1/';
   }
 
   createAuthorizationHeader(headers: Headers) {
     headers.append('Authorization', localStorage.getItem('auth_token'));
+    headers.append('Content-type', 'application/json');
+    headers.append('Accept', 'application/json');
   }
 
   get(url, data, avoid_auth?) {

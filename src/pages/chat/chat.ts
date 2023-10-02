@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { ViewChild, Component } from '@angular/core';
 import { IonicPage, NavParams, Content, ViewController } from 'ionic-angular';
 import { ApiService } from '../../services/api-service';
 import { Utils } from '../../services/utils';

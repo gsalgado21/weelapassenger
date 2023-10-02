@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpService } from './http-service';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import 'rxjs/add/operator/map';
 
 @Injectable()
 export class ApiService {
-
-  constructor(public http: HttpService) { }
+  dados_transacao:any ;
+  constructor(public http: HttpService, private http2: HttpClient,) { }
 
   //USERS
   public checkEmail(email) {
@@ -152,4 +153,203 @@ export class ApiService {
   public getAppVersion() {
     return this.http.get('versions/passanger', null);
   }
+
+  lastHash() {
+
+    return new Promise((resolve, reject) => {
+      //Request to API
+      let httpOptions = {
+          headers: new HttpHeaders({
+              'Content-type': 'application/json',
+              'Accept':'application/json',
+          })
+      }
+
+      let wallet = JSON.parse(localStorage.getItem('wallet'));
+      let body = wallet;
+
+      this.http2.get('https://api.valipag.com.br/c/hashant?publickey=' + body.publickey, httpOptions).subscribe((res: any) => {
+          console.log('last hash', res[0].wallet.transant);
+          // localStorage.setItem(')
+          resolve(res[0].wallet.transant);
+      }, (err) => {
+          console.log('erro api', err)
+          reject(err);
+      });
+    })
+  }
+
+  getCards() {
+    return new Promise((resolve, reject) => {
+      //Request to API
+      let httpOptions = {
+          headers: new HttpHeaders({
+              'Content-type': 'application/json',
+              'Accept':'application/json',
+          })
+      };
+
+      let user = JSON.parse(localStorage.getItem('user'));
+      let body = user;
+
+      console.log('init request cartões');
+      this.http2.get('https://api.valipag.com.br/c/ccrdtc?passageiro=' + body.id, httpOptions).subscribe((res: any) => {
+          let array = [];
+          res.forEach((r) => {
+              array.push(r);
+          })
+          console.log('cartão de crédito', res);
+          console.log('array getcards', array);
+          resolve(array)
+      }, (err) => {
+      });
+    })
+  }
+
+  getWallet() {
+    return new Promise((resolve, reject) => {
+      let user = JSON.parse(localStorage.getItem('user'));
+      let data = {
+          id: user.id
+      };
+
+      //Request to API
+      let httpOptions = {
+          headers: new HttpHeaders({
+              'Content-type': 'application/json',
+              'Accept':'application/json',
+          })
+      }
+      this.http2.get('https://api.valipag.com.br/c/wallet?idm=' + data.id, httpOptions).subscribe((res: any) => {
+          let wallet = res[0].wallet;
+          localStorage.setItem('wallet', JSON.stringify(wallet));
+          resolve(res);
+          console.log('getwallet wallet',wallet);
+      }, (err) => {
+          reject(err);
+      });
+    })
+  }
+
+  getWalletExtrato() {
+    return new Promise((resolve, reject) => {
+        //Request to API
+        let httpOptions = {
+            headers: new HttpHeaders({
+                'Content-type': 'application/json',
+                'Accept':'application/json',
+            })
+        }
+        let wallet = JSON.parse(localStorage.getItem('wallet'));
+        let body = wallet;
+        console.log('WALLET PUBLIC', body);
+
+        //REMOVER
+        // body.publickey = 'd6c64c0604bb1793557d4238adf54abc0f93a275d5ea7180132ef998fd4de20d';
+
+        console.log('init request ddddd');
+
+        this.http2.get('https://api.valipag.com.br/c/extrato?publickey=' + body.publickey, httpOptions).subscribe((res: any) => {
+            let array = [];
+            res.forEach((r) => {
+                array.push(r);
+            })
+            console.log('transações', res);
+            console.log('transações', array);
+            resolve(array)
+        }, (err) => {
+            console.log('erro do extrato', err);
+            reject(err);
+        });
+    })
+  }
+
+  editCard(data) {
+    return new Promise((resolve, reject) => {
+        //Request to API
+        let httpOptions = {
+            headers: new HttpHeaders({
+                'Content-type': 'application/json',
+                'Accept':'application/json',
+            })
+        }
+        this.http2.put('https://api.valipag.com.br/ccrdts/' + data.id + '.json', data, httpOptions).subscribe((res: any) => {
+            console.log('card created', res);
+            resolve(res);
+        }, (err) => {
+            console.log('erro api', err)
+            reject(err);
+        });
+    })
+  }
+
+  newCard(data) {
+    return new Promise((resolve, reject) => {
+        //Request to API
+        let httpOptions = {
+            headers: new HttpHeaders({
+                'Content-type': 'application/json',
+                'Accept':'application/json',
+            })
+        }
+        this.http2.post('https://api.valipag.com.br/ccrdts.json', data, httpOptions).subscribe((res: any) => {
+            console.log('card created', res);
+            resolve(res);
+        }, (err) => {
+            console.log('erro api', err)
+            reject(err);
+        });
+    })
+  }
+
+  recarga1(data) {
+    return new Promise((resolve, reject) => {
+        //Request to API
+        let httpOptions = {
+            headers: new HttpHeaders({
+                'Content-type': 'application/json',
+                'Accept':'application/json',
+            })
+        }
+        // let url = 'https://api.valipag.com.br/c/rcrg?'
+        this.http2.get(data.url, httpOptions).subscribe((res: any) => {
+            // console.log('recarga1', res);
+            resolve(res);
+        }, (err) => {
+            console.log('erro api', err)
+            reject(err);
+        });
+    })
+  }
+
+  recarga2(transacao) {
+    console.log('transacao', transacao);
+    this.dados_transacao = new Object();
+    this.dados_transacao.transacao = transacao;
+    console.log('dados trans', this.dados_transacao);
+    let data = this.dados_transacao;
+    
+
+    return new Promise((resolve, reject) => {
+        //Request to API
+        let httpOptions = {
+            headers: new HttpHeaders({
+                'Content-type': 'application/json',
+                'enctype': 'multipart/form-data;',
+            })
+        }
+
+
+        this.http2.post('https://api.valipag.com.br/transacaos.json', data, httpOptions).subscribe((res: any) => {
+            // console.log('recarga1', res);
+            resolve(res);
+        }, (err) => {
+            console.log('erro api', err)
+            reject(err);
+        });
+    })
+  }
+
+
+
 }
